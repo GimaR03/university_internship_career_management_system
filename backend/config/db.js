@@ -2,11 +2,14 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
     try {
-        await mongoose.connect('mongodb://localhost:27017/taskdb');
+        const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/taskdb';
+
+        await mongoose.connect(mongoUri);
         console.log('MongoDB Connected Successfully');
+        return true;
     } catch (error) {
         console.error('MongoDB Connection Failed:', error);
-        process.exit(1);
+        return false;
     }
 };
 
