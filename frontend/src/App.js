@@ -1,6 +1,13 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './components/HomePage/Home';
+import AdminCompanyPage from './components/AdminManagement/admin_company_page';
+import AdminLogin from './components/AdminManagement/admin_login';
+import AdminCreatePage from './components/AdminManagement/admin_create_page';
+import AdminDashboard from './components/AdminManagement/admin_dashboard';
+import AdminInternshipPage from './components/AdminManagement/admin_internship_page';
+import AdminPaymentPage from './components/AdminManagement/admin_payment_page';
+import AdminRegistryPage from './components/AdminManagement/admin_registry_page';
 import C_CompanyRegister from './components/CompanyManagement/C_CompanyRegister';
 import C_CompanyLogin from './components/CompanyManagement/C_CompanyLogin';
 import C_CompanyDashboard from './components/CompanyManagement/C_CompanyDashboard';
@@ -13,6 +20,15 @@ function App() {
         <Routes>
           {/* Home Route */}
           <Route path="/" element={<Home />} />
+
+          {/* Admin Routes */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/create" element={<AdminCreatePage />} />
+          <Route path="/admin/registry" element={<AdminRegistryPage />} />
+          <Route path="/admin/companies" element={<AdminCompanyPage />} />
+          <Route path="/admin/internships" element={<AdminInternshipPage />} />
+          <Route path="/admin/payments" element={<AdminPaymentPage />} />
           
           {/* Company Routes */}
           <Route path="/register/company" element={<C_CompanyRegister />} />

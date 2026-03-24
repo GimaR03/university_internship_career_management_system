@@ -30,6 +30,12 @@ const Home = () => {
             >
               Company Login
             </Link>
+            <Link
+              to="/admin/login"
+              className="px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 hover:shadow-lg transform hover:scale-105 transition-all duration-300"
+            >
+              Admin Portal
+            </Link>
           </div>
         </div>
       </div>
@@ -46,7 +52,7 @@ const Home = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-12">
+        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-12">
           {/* Student Card */}
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:scale-105 transition-all duration-300">
             <div className="p-8">
@@ -138,6 +144,51 @@ const Home = () => {
               </Link>
             </div>
           </div>
+
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:scale-105 transition-all duration-300">
+            <div className="p-8">
+              <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-6">
+                <svg className="w-10 h-10 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 11c0 1.657-1.79 3-4 3s-4-1.343-4-3 1.79-3 4-3 4 1.343 4 3zm8 0c0 1.657-1.79 3-4 3s-4-1.343-4-3 1.79-3 4-3 4 1.343 4 3zM8 14v5m8-5v5M3 19h10m8 0h-6" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                For Admins
+              </h3>
+              <ul className="space-y-3 text-gray-600 mb-6">
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  Create admin accounts
+                </li>
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  Assign operational roles
+                </li>
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  Review platform activity
+                </li>
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  Track analytics snapshots
+                </li>
+              </ul>
+              <Link
+                to="/admin/login"
+                className="block text-center px-6 py-3 bg-slate-900 text-white rounded-lg font-semibold hover:bg-slate-800 transition-colors"
+              >
+                Open Admin Portal
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -224,6 +275,12 @@ const Home = () => {
               className="px-8 py-3 border-2 border-indigo-600 text-indigo-600 rounded-lg font-semibold hover:bg-indigo-50 transition-colors"
             >
               Post Internship
+            </Link>
+            <Link
+              to="/admin/login"
+              className="px-8 py-3 bg-slate-900 text-white rounded-lg font-semibold hover:bg-slate-800 transition-colors"
+            >
+              Manage Platform
             </Link>
           </div>
         </div>
