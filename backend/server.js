@@ -11,7 +11,14 @@ const app = express();
 
 // Body parser
 app.use(express.json());
-<<<<<<< Updated upstream
+app.use(express.urlencoded({ extended: true }));
+
+// Enable CORS
+app.use(cors({
+    origin: ['http://localhost:3000'],
+    credentials: true
+}));
+
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
@@ -22,18 +29,6 @@ app.use("/api/internships", require("./routes/c_internshipRoutes"));
 app.use("/api/upload", require("./routes/c_uploadRoutes"));
 app.use("/api/payments", require("./routes/p_paymentRoutes"));
 app.use("/api/pro-accounts", require("./routes/p_proAccountRoutes"));
-=======
-app.use(express.urlencoded({ extended: true }));
-
-// Enable CORS
-app.use(cors({
-    origin: ['http://localhost:3000'],
-    credentials: true
-}));
-
-// Routes (ONLY existing ones)
-app.use('/api/companies', require('./routes/C_companyRoutes'));
->>>>>>> Stashed changes
 
 // Basic route
 app.get('/', (req, res) => {
@@ -61,7 +56,6 @@ app.use((req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-<<<<<<< Updated upstream
 const startServer = async () => {
     const isDatabaseConnected = await connectDB();
 
@@ -70,13 +64,8 @@ const startServer = async () => {
     }
 
     app.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`);
+        console.log(`🚀 Server running on port ${PORT}`);
     });
 };
 
 startServer();
-=======
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-});
->>>>>>> Stashed changes

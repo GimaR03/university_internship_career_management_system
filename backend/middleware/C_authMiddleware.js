@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const Company = require('../models/C_companyModel');
+const Company = require('../models/c_companyModel');
 
 // Protect Company
 const protectCompany = async (req, res, next) => {
