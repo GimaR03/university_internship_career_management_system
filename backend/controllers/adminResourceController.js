@@ -1,5 +1,5 @@
-const Company = require('../models/C_companyModel');
-const Internship = require('../models/C_internshipModel');
+const Company = require('../models/c_companyModel');
+const Internship = require('../models/c_internshipModel');
 const Payment = require('../models/p_paymentModel');
 
 const createCrudHandlers = (Model, entityName) => ({
@@ -61,7 +61,14 @@ exports.createCompany = companyHandlers.create;
 exports.updateCompany = companyHandlers.update;
 exports.deleteCompany = companyHandlers.remove;
 
-exports.getInternships = internshipHandlers.list;
+exports.getInternships = async (req, res) => {
+  try {
+    const items = await Internship.find().populate('companyId', 'companyName email').sort({ createdAt: -1 });
+    return res.status(200).json({ success: true, data: items });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
 exports.createInternship = internshipHandlers.create;
 exports.updateInternship = internshipHandlers.update;
 exports.deleteInternship = internshipHandlers.remove;

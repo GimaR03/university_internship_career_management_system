@@ -8,16 +8,20 @@ dotenv.config();
 
 const app = express();
 
-const allowedOrigins = new Set([
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    'http://localhost:3001',
-    'http://127.0.0.1:3001'
-]);
+const isAllowedOrigin = (origin) => {
+    if (!origin) return true;
+
+    try {
+        const { hostname } = new URL(origin);
+        return hostname === 'localhost' || hostname === '127.0.0.1';
+    } catch (error) {
+        return false;
+    }
+};
 
 app.use(cors({
     origin: (origin, callback) => {
-        if (!origin || allowedOrigins.has(origin)) {
+        if (isAllowedOrigin(origin)) {
             return callback(null, true);
         }
 

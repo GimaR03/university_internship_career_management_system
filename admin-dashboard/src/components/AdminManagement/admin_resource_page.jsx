@@ -11,6 +11,9 @@ import {
 
 const AdminResourcePage = ({ resourceKey }) => {
   const config = RESOURCE_CONFIGS[resourceKey];
+  const getValue = (record, path) =>
+    path.split('.').reduce((current, key) => (current == null ? undefined : current[key]), record);
+
   const initialForm = useMemo(
     () =>
       config.fields.reduce((acc, field) => {
@@ -104,7 +107,7 @@ const AdminResourcePage = ({ resourceKey }) => {
     const matchesSearch =
       !searchTerm ||
       config.columns.some((column) =>
-        String(record[column] ?? '')
+        String(getValue(record, column) ?? '')
           .toLowerCase()
           .includes(searchTerm.toLowerCase())
       );
@@ -282,7 +285,7 @@ const AdminResourcePage = ({ resourceKey }) => {
                 <tr key={record._id} className="hover:bg-indigo-50/40">
                   {config.columns.map((column) => (
                     <td key={`${record._id}-${column}`} className="px-4 py-4 text-sm text-slate-700">
-                      {String(record[column] ?? '-')}
+                      {String(getValue(record, column) ?? '-')}
                     </td>
                   ))}
                   <td className="px-4 py-4">
