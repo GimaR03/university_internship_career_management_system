@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getCompanyProfile, getCompanyInternships, logoutCompany } from './C_CompanyUtils';
-import C_PostInternship from './C_PostInternship';
-import C_InternshipList from './C_InternshipList';
-import C_StudentRecommendations from './C_StudentRecommendations';
-import C_CompanyProfile from './C_CompanyProfile';
-import C_ApplicationManagement from './C_ApplicationManagement';
+import PostInternship from './C_PostInternship';
+import InternshipList from './C_InternshipList';
+import StudentRecommendations from './C_StudentRecommendations';
+import CompanyProfile from './C_CompanyProfile';
+import ApplicationManagement from './C_ApplicationManagement';
 
 const C_CompanyDashboard = () => {
     const navigate = useNavigate();
@@ -21,6 +21,30 @@ const C_CompanyDashboard = () => {
         }
     }, [state]);
 
+    const fetchCompanyData = useCallback(async () => {
+        try {
+            const result = await getCompanyProfile();
+            setCompanyData(result.data);
+        } catch (error) {
+            console.error('Error fetching company data:', error);
+            if (error.message === 'Unauthorized') {
+                logoutCompany();
+                navigate('/login/company');
+            }
+        }
+    }, [navigate]);
+
+    const fetchInternships = useCallback(async () => {
+        try {
+            const result = await getCompanyInternships();
+            setInternships(result.data);
+        } catch (error) {
+            console.error('Error fetching internships:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     useEffect(() => {
         const token = localStorage.getItem('companyToken');
         if (!token) {
@@ -35,31 +59,7 @@ const C_CompanyDashboard = () => {
         
         fetchCompanyData();
         fetchInternships();
-    }, []);
-
-    const fetchCompanyData = async () => {
-        try {
-            const result = await getCompanyProfile();
-            setCompanyData(result.data);
-        } catch (error) {
-            console.error('Error fetching company data:', error);
-            if (error.message === 'Unauthorized') {
-                logoutCompany();
-                navigate('/login/company');
-            }
-        }
-    };
-
-    const fetchInternships = async () => {
-        try {
-            const result = await getCompanyInternships();
-            setInternships(result.data);
-        } catch (error) {
-            console.error('Error fetching internships:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    }, [fetchCompanyData, fetchInternships]);
 
     const handleLogout = () => {
         logoutCompany();
@@ -267,7 +267,7 @@ const C_CompanyDashboard = () => {
                 )}
 
                 {activeTab === 'post' && (
-                    <C_PostInternship onSuccess={(createdInternship) => {
+                    <PostInternship onSuccess={(createdInternship) => {
                         refreshInternships();
                         navigate('/payments/upload', {
                             state: {
@@ -281,19 +281,19 @@ const C_CompanyDashboard = () => {
                 )}
 
                 {activeTab === 'internships' && (
-                    <C_InternshipList internships={internships} onUpdate={refreshInternships} />
+                    <InternshipList internships={internships} onUpdate={refreshInternships} />
                 )}
 
                 {activeTab === 'applications' && (
-                    <C_ApplicationManagement internships={internships} />
+                    <ApplicationManagement internships={internships} />
                 )}
 
                 {activeTab === 'recommendations' && (
-                    <C_StudentRecommendations internships={internships} />
+                    <StudentRecommendations internships={internships} />
                 )}
 
                 {activeTab === 'profile' && (
-                    <C_CompanyProfile companyData={companyData} onUpdate={fetchCompanyData} />
+                    <CompanyProfile companyData={companyData} onUpdate={fetchCompanyData} />
                 )}
             </main>
         </div>

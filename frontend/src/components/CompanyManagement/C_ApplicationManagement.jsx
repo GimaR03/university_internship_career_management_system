@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { getApplications, updateApplicationStatus } from './C_CompanyUtils';
 
 const C_ApplicationManagement = ({ internships }) => {
@@ -8,7 +8,7 @@ const C_ApplicationManagement = ({ internships }) => {
     const [error, setError] = useState('');
     const [selectedApplication, setSelectedApplication] = useState(null);
 
-    const fetchApplications = async () => {
+    const fetchApplications = useCallback(async () => {
         if (!selectedInternship) return;
         
         setLoading(true);
@@ -22,13 +22,13 @@ const C_ApplicationManagement = ({ internships }) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [selectedInternship]);
 
     useEffect(() => {
         if (selectedInternship) {
             fetchApplications();
         }
-    }, [selectedInternship]);
+    }, [selectedInternship, fetchApplications]);
 
     const handleStatusUpdate = async (applicationId, status) => {
         try {

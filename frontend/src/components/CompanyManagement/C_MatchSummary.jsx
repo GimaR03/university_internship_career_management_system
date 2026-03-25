@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { getMatchSummary } from './C_CompanyUtils';
 
 const C_MatchSummary = ({ student, internshipId, onClose }) => {
@@ -6,11 +6,7 @@ const C_MatchSummary = ({ student, internshipId, onClose }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    useEffect(() => {
-        fetchMatchSummary();
-    }, []);
-
-    const fetchMatchSummary = async () => {
+    const fetchMatchSummary = useCallback(async () => {
         try {
             const result = await getMatchSummary(student._id, internshipId);
             setSummary(result.data);
@@ -19,7 +15,11 @@ const C_MatchSummary = ({ student, internshipId, onClose }) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [internshipId, student._id]);
+
+    useEffect(() => {
+        fetchMatchSummary();
+    }, [fetchMatchSummary]);
 
     const getScoreColor = (score) => {
         if (score >= 80) return 'text-green-600';

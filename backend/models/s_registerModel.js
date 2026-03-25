@@ -15,4 +15,4 @@ const studentSchema = new mongoose.Schema({
   year: { type: String, default: "", trim: true }
 }, { timestamps: true });
 
-module.exports = mongoose.model("Student", studentSchema);
+module.exports = mongoose.models.Student || mongoose.model("Student", studentSchema);

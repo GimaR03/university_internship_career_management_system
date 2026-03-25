@@ -47,4 +47,4 @@ const applicationSchema = new mongoose.Schema({
 // Ensure one application per student per internship
 applicationSchema.index({ internshipId: 1, studentId: 1 }, { unique: true });
 
-module.exports = mongoose.model('Application', applicationSchema);
+module.exports = mongoose.models.Application || mongoose.model('Application', applicationSchema);

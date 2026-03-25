@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCompanyProAccount, getStudentRecommendations, searchStudentsDirectly } from './C_CompanyUtils';
-import C_MatchSummary from './C_MatchSummary';
+import MatchSummary from './C_MatchSummary';
 
 const JOB_CATEGORIES = [
     'Frontend Developer',
@@ -64,7 +64,7 @@ const C_StudentRecommendations = ({ internships }) => {
         fetchProStatus();
     }, []);
 
-    const fetchRecommendations = async () => {
+    const fetchRecommendations = useCallback(async () => {
         if (!selectedInternship) return;
         
         setLoading(true);
@@ -78,13 +78,13 @@ const C_StudentRecommendations = ({ internships }) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [selectedInternship]);
 
     useEffect(() => {
         if (selectedInternship) {
             fetchRecommendations();
         }
-    }, [selectedInternship]);
+    }, [selectedInternship, fetchRecommendations]);
 
     const handleDirectSearch = async () => {
         if (!directSearch.category || !directSearch.district) {
@@ -373,7 +373,7 @@ const C_StudentRecommendations = ({ internships }) => {
             
             {/* Match Summary Modal */}
             {selectedStudent && (
-                <C_MatchSummary
+                <MatchSummary
                     student={selectedStudent}
                     internshipId={selectedInternship}
                     onClose={() => setSelectedStudent(null)}

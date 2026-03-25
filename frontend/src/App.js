@@ -4,11 +4,11 @@ import Home from './components/HomePage/Home';
 import CompanyRegister from './components/CompanyManagement/C_CompanyRegister';
 import CompanyLogin from './components/CompanyManagement/C_CompanyLogin';
 import CompanyDashboard from './components/CompanyManagement/C_CompanyDashboard';
-import P_PaymentUpload from './components/PaymentManagement/p_PaymentUpload';
-import P_PaymentSummary from './components/PaymentManagement/p_PaymentSummary';
-import P_PaymentSuccess from './components/PaymentManagement/p_PaymentSuccess';
-import P_ProAccountUpgrade from './components/PaymentManagement/p_ProAccountUpgrade';
-import A_PaymentManagement from './components/AdminManagement/A_PaymentManagement';
+import PaymentUpload from './components/PaymentManagement/p_PaymentUpload';
+import PaymentSummary from './components/PaymentManagement/p_PaymentSummary';
+import PaymentSuccess from './components/PaymentManagement/p_PaymentSuccess';
+import ProAccountUpgrade from './components/PaymentManagement/p_ProAccountUpgrade';
+import AdminPaymentManagement from './components/AdminManagement/A_PaymentManagement';
 import Header from './components/Layout/Header';
 import Footer from './components/Layout/Footer';
 import AboutUs from './pages/AboutUs';
@@ -36,11 +36,11 @@ function App() {
           <Route path="/company/dashboard" element={<CompanyDashboard />} />
 
           {/* Payment Routes */}
-          <Route path="/payments/upload" element={<P_PaymentUpload />} />
-          <Route path="/payments/summary" element={<P_PaymentSummary />} />
-          <Route path="/payments/success" element={<P_PaymentSuccess />} />
-          <Route path="/payments/pro-upgrade" element={<P_ProAccountUpgrade />} />
-          <Route path="/admin/payments" element={<A_PaymentManagement />} />
+          <Route path="/payments/upload" element={<PaymentUpload />} />
+          <Route path="/payments/summary" element={<PaymentSummary />} />
+          <Route path="/payments/success" element={<PaymentSuccess />} />
+          <Route path="/payments/pro-upgrade" element={<ProAccountUpgrade />} />
+          <Route path="/admin/payments" element={<AdminPaymentManagement />} />
           
           {/* Student Routes - Placeholder */}
           <Route path="/login/student" element={
