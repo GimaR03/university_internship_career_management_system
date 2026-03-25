@@ -11,9 +11,9 @@ const {
 const { protectCompany } = require('../middleware/C_authMiddleware');
 
 router.get('/', getAllInternships);
+router.get('/company/:companyId', protectCompany, getInternshipsByCompany);
 router.get('/:id', getInternshipById);
 router.post('/', protectCompany, createInternship);
-router.get('/company/:companyId', protectCompany, getInternshipsByCompany);
 router.put('/:id', protectCompany, updateInternship);
 router.delete('/:id', protectCompany, deleteInternship);
 

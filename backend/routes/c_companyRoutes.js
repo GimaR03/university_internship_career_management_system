@@ -7,7 +7,7 @@ const {
     getCompanyProfile,
     updateCompanyProfile,
     getAllCompanies
-} = require('../controllers/C_companyController');
+} = require('../controllers/c_companyController');
 
 const { protectCompany } = require('../middleware/C_authMiddleware');
 
