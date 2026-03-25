@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import AdminLayout from './admin_layout';
 import AdminList from './admin_list';
+import { downloadFilteredPdfReport } from './admin_pdf_utils';
 import { ADMIN_ROLES, fetchAdmins, removeAdmin, updateAdmin, updateAdminRole } from './admin_utils';
 
 const AdminRegistryPage = () => {
   const [admins, setAdmins] = useState([]);
   const [message, setMessage] = useState('');
   const [editingAdmin, setEditingAdmin] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [roleFilter, setRoleFilter] = useState('All');
+  const [statusFilter, setStatusFilter] = useState('All');
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -83,6 +87,45 @@ const AdminRegistryPage = () => {
     setMessage(
       `Admin removed using ${result.source === 'backend' ? 'backend API' : 'local demo storage'}.`
     );
+  };
+
+  const filteredAdmins = admins.filter((admin) => {
+    const matchesSearch =
+      !searchTerm ||
+      [admin.fullName, admin.email, admin.role, admin.department]
+        .join(' ')
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+
+    const matchesRole = roleFilter === 'All' || admin.role === roleFilter;
+    const matchesStatus = statusFilter === 'All' || admin.status === statusFilter;
+
+    return matchesSearch && matchesRole && matchesStatus;
+  });
+
+  const handleDownloadReport = () => {
+    downloadFilteredPdfReport({
+      fileName: 'admin-registry-report.pdf',
+      title: 'Admin Registry Report',
+      subtitle: 'This report contains only the admin accounts visible after the current filter and search settings.',
+      filters: {
+        Search: searchTerm || 'All',
+        Role: roleFilter,
+        Status: statusFilter,
+      },
+      columns: [
+        { key: 'fullName', label: 'Full Name' },
+        { key: 'email', label: 'Email' },
+        { key: 'role', label: 'Role' },
+        { key: 'department', label: 'Department' },
+        { key: 'status', label: 'Status' },
+        { key: 'createdAt', label: 'Created Date' },
+      ],
+      rows: filteredAdmins.map((admin) => ({
+        ...admin,
+        createdAt: admin.createdAt ? new Date(admin.createdAt).toLocaleDateString() : '-',
+      })),
+    });
   };
 
   return (
@@ -191,8 +234,72 @@ const AdminRegistryPage = () => {
             </form>
           </div>
         )}
+        <div className="rounded-3xl border border-indigo-100 bg-white p-6 shadow-xl">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div className="grid flex-1 gap-4 lg:grid-cols-3">
+              <label className="block">
+                <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-indigo-500">
+                  Search
+                </span>
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                  placeholder="Search admins..."
+                  className="w-full rounded-2xl border border-indigo-100 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                />
+              </label>
+
+              <label className="block">
+                <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-indigo-500">
+                  Role
+                </span>
+                <select
+                  value={roleFilter}
+                  onChange={(event) => setRoleFilter(event.target.value)}
+                  className="w-full rounded-2xl border border-indigo-100 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                >
+                  <option value="All">All</option>
+                  {ADMIN_ROLES.map((role) => (
+                    <option key={role} value={role}>
+                      {role}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="block">
+                <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-indigo-500">
+                  Status
+                </span>
+                <select
+                  value={statusFilter}
+                  onChange={(event) => setStatusFilter(event.target.value)}
+                  className="w-full rounded-2xl border border-indigo-100 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                >
+                  <option value="All">All</option>
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+              </label>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleDownloadReport}
+              disabled={filteredAdmins.length === 0}
+              className="rounded-2xl bg-gradient-to-r from-violet-700 to-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:from-violet-800 hover:to-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Download PDF Report
+            </button>
+          </div>
+
+          <p className="mt-4 text-sm font-medium text-slate-500">
+            Showing {filteredAdmins.length} of {admins.length} admins
+          </p>
+        </div>
         <AdminList
-          admins={admins}
+          admins={filteredAdmins}
           onRoleChange={handleRoleChange}
           onEdit={handleEdit}
           onDelete={handleDelete}

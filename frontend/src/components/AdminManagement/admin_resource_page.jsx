@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import AdminLayout from './admin_layout';
+import { downloadFilteredPdfReport } from './admin_pdf_utils';
 import {
   RESOURCE_CONFIGS,
   createResourceRecord,
@@ -24,6 +25,8 @@ const AdminResourcePage = ({ resourceKey }) => {
   const [editingId, setEditingId] = useState(null);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All');
 
   useEffect(() => {
     const loadRecords = async () => {
@@ -93,6 +96,37 @@ const AdminResourcePage = ({ resourceKey }) => {
     } catch (err) {
       setError(err.response?.data?.message || 'Delete failed');
     }
+  };
+
+  const statusField = config.fields.find((field) => field.name === 'status');
+
+  const filteredRecords = records.filter((record) => {
+    const matchesSearch =
+      !searchTerm ||
+      config.columns.some((column) =>
+        String(record[column] ?? '')
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+      );
+
+    const matchesStatus =
+      statusFilter === 'All' || String(record.status ?? '') === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
+
+  const handleDownloadReport = () => {
+    downloadFilteredPdfReport({
+      fileName: `${config.endpoint}-report.pdf`,
+      title: `${config.title} Report`,
+      subtitle: 'This report contains only the records visible after the current filter and search settings.',
+      filters: {
+        Search: searchTerm || 'All',
+        Status: statusFilter,
+      },
+      columns: config.columns.map((column) => ({ key: column, label: column })),
+      rows: filteredRecords,
+    });
   };
 
   return (
@@ -177,8 +211,62 @@ const AdminResourcePage = ({ resourceKey }) => {
         </div>
 
         <div className="rounded-3xl border border-indigo-100 bg-white p-6 shadow-xl overflow-x-auto">
-          <h2 className="text-2xl font-bold text-slate-900">{config.title} Table</h2>
-          <p className="mt-2 text-sm text-slate-600">View all records and manage them from one place.</p>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900">{config.title} Table</h2>
+              <p className="mt-2 text-sm text-slate-600">View all records and manage them from one place.</p>
+            </div>
+
+            <div className="flex flex-col gap-3 lg:items-end">
+              <button
+                type="button"
+                onClick={handleDownloadReport}
+                disabled={filteredRecords.length === 0}
+                className="rounded-2xl bg-gradient-to-r from-violet-700 to-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:from-violet-800 hover:to-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Download PDF Report
+              </button>
+
+              <div className="grid gap-3 md:grid-cols-2">
+                <label className="block">
+                  <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-indigo-500">
+                    Search
+                  </span>
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(event) => setSearchTerm(event.target.value)}
+                    placeholder={`Search ${config.title.toLowerCase()}...`}
+                    className="w-full rounded-2xl border border-indigo-100 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                  />
+                </label>
+
+                {statusField && (
+                  <label className="block">
+                    <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-indigo-500">
+                      Status
+                    </span>
+                    <select
+                      value={statusFilter}
+                      onChange={(event) => setStatusFilter(event.target.value)}
+                      className="w-full rounded-2xl border border-indigo-100 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                    >
+                      <option value="All">All</option>
+                      {statusField.options.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <p className="mt-4 text-sm font-medium text-slate-500">
+            Showing {filteredRecords.length} of {records.length} records
+          </p>
 
           <table className="mt-6 min-w-full divide-y divide-indigo-100">
             <thead className="bg-indigo-50/80">
@@ -190,7 +278,7 @@ const AdminResourcePage = ({ resourceKey }) => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {records.map((record) => (
+              {filteredRecords.map((record) => (
                 <tr key={record._id} className="hover:bg-indigo-50/40">
                   {config.columns.map((column) => (
                     <td key={`${record._id}-${column}`} className="px-4 py-4 text-sm text-slate-700">
@@ -217,6 +305,16 @@ const AdminResourcePage = ({ resourceKey }) => {
                   </td>
                 </tr>
               ))}
+              {filteredRecords.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={config.columns.length + 1}
+                    className="px-4 py-8 text-center text-sm text-slate-500"
+                  >
+                    No matching records found.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
