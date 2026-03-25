@@ -1,7 +1,9 @@
 const jwt = require('jsonwebtoken');
 const Company = require('../models/c_companyModel');
+const Student = require('../models/s_registerModel');
 
-// Protect Company
+const getJwtSecret = () => process.env.JWT_SECRET || 'secretKey';
+
 const protectCompany = async (req, res, next) => {
     let token;
 
@@ -17,15 +19,13 @@ const protectCompany = async (req, res, next) => {
                 return res.status(401).json({ message: 'Company not found' });
             }
 
-            next();
+            return next();
         } catch (error) {
             return res.status(401).json({ message: 'Token failed' });
         }
     }
 
-    if (!token) {
-        return res.status(401).json({ message: 'No token' });
-    }
+    return res.status(401).json({ message: 'No token' });
 };
 
 const protectStudent = async (req, res, next) => {
@@ -43,18 +43,15 @@ const protectStudent = async (req, res, next) => {
                 return res.status(401).json({ message: 'Student not found' });
             }
 
-            next();
+            return next();
         } catch (error) {
             return res.status(401).json({ message: 'Token failed' });
         }
     }
 
-    if (!token) {
-        return res.status(401).json({ message: 'No token' });
-    }
+    return res.status(401).json({ message: 'No token' });
 };
 
-// Generate Token
 const generateToken = (id) => {
     return jwt.sign({ id }, getJwtSecret(), {
         expiresIn: '7d'

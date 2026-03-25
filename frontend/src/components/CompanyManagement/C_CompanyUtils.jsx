@@ -15,10 +15,11 @@ const getAuthHeader = () => {
 export const registerCompany = async (companyData) => {
     try {
         const response = await axios.post(`${API_URL}/company/register`, companyData);
+        const company = response.data.company || response.data.data;
         if (response.data.success) {
             localStorage.setItem('companyToken', response.data.token);
-            localStorage.setItem('companyId', response.data.data.id);
-            localStorage.setItem('companyName', response.data.data.companyName);
+            localStorage.setItem('companyId', company?._id || company?.id || '');
+            localStorage.setItem('companyName', company?.companyName || '');
         }
         return response.data;
     } catch (error) {
@@ -30,10 +31,11 @@ export const registerCompany = async (companyData) => {
 export const loginCompany = async (email, password) => {
     try {
         const response = await axios.post(`${API_URL}/company/login`, { email, password });
+        const company = response.data.company || response.data.data;
         if (response.data.success) {
             localStorage.setItem('companyToken', response.data.token);
-            localStorage.setItem('companyId', response.data.data.id);
-            localStorage.setItem('companyName', response.data.data.companyName);
+            localStorage.setItem('companyId', company?._id || company?.id || '');
+            localStorage.setItem('companyName', company?.companyName || '');
         }
         return response.data;
     } catch (error) {
