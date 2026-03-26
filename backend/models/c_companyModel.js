@@ -24,12 +24,11 @@ const companySchema = new mongoose.Schema({
   description: String,
 }, { timestamps: true });
 
-companySchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
+companySchema.pre('save', async function() {
+  if (!this.isModified('password')) return;
 
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
-  next();
 });
 
 companySchema.methods.comparePassword = async function(enteredPassword) {
