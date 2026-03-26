@@ -123,24 +123,28 @@ const A_PaymentManagement = () => {
     setAdminSession(getStoredAdminSession());
   }, []);
 
-  useEffect(() => {
-    if (adminSession?.token) {
-      fetchPayments();
-    }
-  }, [adminSession]);
-
   const fetchPayments = async () => {
     setLoading(true);
     setError("");
+
     try {
-      const response = await axios.get(`${API_URL}/payments/admin`, authConfig);
+      const apiEndpoint = adminSession?.token ? `${API_URL}/payments/admin` : `${API_URL}/payments/all`;
+      const config = adminSession?.token ? authConfig : {};
+
+      const response = await axios.get(apiEndpoint, config);
       setPayments(Array.isArray(response.data?.data) ? response.data.data : []);
     } catch (err) {
+      console.error("Payment fetch error:", err);
       setError(err.response?.data?.message || "Failed to load payments");
+      setPayments([]);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchPayments();
+  }, [adminSession, authConfig]);
 
   const handleStatusChange = async (paymentId, status) => {
     setActionLoadingId(paymentId);
@@ -214,19 +218,7 @@ const A_PaymentManagement = () => {
         : "bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
     }`;
 
-  if (!adminSession?.token) {
-    return (
-      <AdminLayout
-        title="Payment Data"
-        description="Manage company and student payment records."
-        allowedRoles={PAGE_ACCESS.payments}
-      >
-        <div className="mx-auto max-w-4xl rounded-2xl border border-amber-200 bg-amber-50 p-6 text-amber-900 shadow-sm">
-          Admin login is required to manage payment records.
-        </div>
-      </AdminLayout>
-    );
-  }
+  const isAdmin = Boolean(adminSession?.token);
 
   return (
     <AdminLayout
@@ -234,6 +226,12 @@ const A_PaymentManagement = () => {
       description="Record, review, and update all company and student payments from one admin workspace."
       allowedRoles={PAGE_ACCESS.payments}
     >
+      {!isAdmin ? (
+        <div className="mx-auto max-w-4xl rounded-2xl border border-amber-200 bg-amber-50 p-6 text-amber-900 shadow-sm mb-6">
+          <p className="font-semibold">Note: Admin login not detected.</p>
+          <p>Payment records are read-only and filtered to accessible data. Log in as admin for full management actions.</p>
+        </div>
+      ) : null}
       <div className="space-y-6">
         <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-6 md:p-8">
           <div className="grid gap-4 md:grid-cols-4">
@@ -441,8 +439,20 @@ const A_PaymentManagement = () => {
 
           {loading ? (
             <div className="py-12 text-center text-slate-600">Loading payments...</div>
+          ) : error ? (
+            <div className="rounded-lg bg-rose-50 p-4 text-rose-700 border border-rose-200">
+              <p className="font-semibold">Error loading payments:</p>
+              <p className="text-sm mt-1">{error}</p>
+            </div>
           ) : filteredPayments.length === 0 ? (
-            <div className="py-12 text-center text-slate-600">No payments found for the selected filters.</div>
+            <div className="py-12 text-center">
+              <p className="text-slate-600 text-lg">No payments found for the selected filters.</p>
+              <p className="text-slate-500 text-sm mt-3">Payments will appear here when:</p>
+              <ul className="text-slate-500 text-sm mt-2 space-y-1">
+                <li>• Companies submit payment slips from the payment upload page</li>
+                <li>• You manually add payment records using the form above</li>
+              </ul>
+            </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full border-separate border-spacing-y-2 text-sm text-slate-700">
