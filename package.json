@@ -1,0 +1,18 @@
+{
+  "name": "university-internship-career-management-system",
+  "version": "1.0.0",
+  "private": true,
+  "description": "University Internship Career Management System",
+  "workspaces": [
+    "frontend",
+    "backend",
+    "admin-dashboard"
+  ],
+  "scripts": {
+    "install-all": "npm install",
+    "start-backend": "cd backend && npm start",
+    "start-frontend": "cd frontend && npm start",
+    "start-admin": "cd admin-dashboard && npm start",
+    "build-all": "npm run build --workspaces"
+  }
+}

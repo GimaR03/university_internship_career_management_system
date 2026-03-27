@@ -1,10 +1,48 @@
-import React, { useState } from 'react';
-import { updateInternship, deleteInternship } from './C_CompanyUtils';
+import React, { useEffect, useState } from 'react';
+import { updateInternship, deleteInternship, getCompanyPayments } from './C_CompanyUtils';
 
 const C_InternshipList = ({ internships, onUpdate }) => {
     const [editingId, setEditingId] = useState(null);
     const [editForm, setEditForm] = useState({});
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
+    const [paymentStatusMap, setPaymentStatusMap] = useState({});
+
+    useEffect(() => {
+        const loadCompanyPaymentStatuses = async () => {
+            try {
+                const result = await getCompanyPayments();
+                const payments = Array.isArray(result?.data) ? result.data : [];
+
+                const latestStatusByInternship = payments.reduce((acc, payment) => {
+                    if (!payment?.internshipId || !payment?.status) return acc;
+
+                    const internshipId = String(payment.internshipId);
+                    const current = acc[internshipId];
+                    const paymentTime = new Date(payment.updatedAt || payment.createdAt || 0).getTime();
+
+                    if (!current || paymentTime >= current.timestamp) {
+                        acc[internshipId] = {
+                            status: payment.status,
+                            timestamp: paymentTime
+                        };
+                    }
+
+                    return acc;
+                }, {});
+
+                const simplified = Object.keys(latestStatusByInternship).reduce((acc, internshipId) => {
+                    acc[internshipId] = latestStatusByInternship[internshipId].status;
+                    return acc;
+                }, {});
+
+                setPaymentStatusMap(simplified);
+            } catch (error) {
+                setPaymentStatusMap({});
+            }
+        };
+
+        loadCompanyPaymentStatuses();
+    }, [internships.length]);
 
     const handleEdit = (internship) => {
         setEditingId(internship._id);
@@ -44,6 +82,22 @@ const C_InternshipList = ({ internships, onUpdate }) => {
         return status === 'active' ? 'text-green-600 bg-green-100' : 'text-red-600 bg-red-100';
     };
 
+    const getVerificationLabel = (status) => {
+        if (status === 'verified') return 'Verified';
+        if (status === 'rejected') return 'Rejected';
+        return 'Pending Verification';
+    };
+
+    const getVerificationColor = (status) => {
+        if (status === 'verified') return 'text-emerald-700 bg-emerald-100';
+        if (status === 'rejected') return 'text-rose-700 bg-rose-100';
+        return 'text-amber-700 bg-amber-100';
+    };
+
+    const resolveVerificationStatus = (internship) => {
+        return internship.paymentVerificationStatus || paymentStatusMap[String(internship._id)] || 'pending';
+    };
+
     return (
         <div className="space-y-4">
             <div className="bg-white rounded-lg shadow p-6">
@@ -61,6 +115,7 @@ const C_InternshipList = ({ internships, onUpdate }) => {
                 ) : (
                     <div className="space-y-4">
                         {internships.map((internship) => (
+                            
                             <div key={internship._id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
                                 {editingId === internship._id ? (
                                     // Edit Mode
@@ -151,6 +206,9 @@ const C_InternshipList = ({ internships, onUpdate }) => {
                                                     </h3>
                                                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(internship.status)}`}>
                                                         {internship.status}
+                                                    </span>
+                                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getVerificationColor(resolveVerificationStatus(internship))}`}>
+                                                        {getVerificationLabel(resolveVerificationStatus(internship))}
                                                     </span>
                                                 </div>
                                                 <p className="text-gray-600 mb-3">{internship.description}</p>

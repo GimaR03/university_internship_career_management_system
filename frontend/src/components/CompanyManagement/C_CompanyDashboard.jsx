@@ -259,23 +259,6 @@ const C_CompanyDashboard = () => {
                                         </div>
                                     </button>
                                     <button
-                                        onClick={() => navigate('/payments/upload', {
-                                            state: {
-                                                companyId: localStorage.getItem('companyId'),
-                                                companyName: companyData?.companyName || localStorage.getItem('companyName') || ''
-                                            }
-                                        })}
-                                        className="w-full p-3 border-2 border-dashed border-emerald-300 rounded-lg hover:border-emerald-500 hover:bg-emerald-50 transition-colors text-left"
-                                    >
-                                        <div className="flex items-center space-x-3">
-                                            <span className="text-2xl">💳</span>
-                                            <div>
-                                                <div className="font-semibold text-emerald-600">Upload Payment Slip</div>
-                                                <div className="text-sm text-gray-500">Submit payment details and proof</div>
-                                            </div>
-                                        </div>
-                                    </button>
-                                    <button
                                         onClick={() => setActiveTab('recommendations')}
                                         className="w-full p-3 border-2 border-dashed border-purple-300 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-colors text-left"
                                     >

@@ -61,8 +61,13 @@ const internshipSchema = new mongoose.Schema({
   },
   paymentVerificationStatus: {
     type: String,
+<<<<<<< HEAD
     enum: ['not_verified', 'pending', 'verified', 'rejected'],
     default: 'not_verified',
+=======
+    enum: ['pending', 'verified', 'rejected'],
+    default: 'pending',
+>>>>>>> main
   },
   paymentVerifiedAt: {
     type: Date,

@@ -26,6 +26,7 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [sessionAdmin, setSessionAdmin] = useState(null);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
     const loadAdmins = async () => {
@@ -36,6 +37,11 @@ const AdminDashboard = () => {
 
       const session = getAdminSession();
       setSessionAdmin(session?.admin || null);
+
+      const savedTheme = localStorage.getItem('theme');
+      const shouldUseDark = savedTheme === 'dark';
+      setIsDarkMode(shouldUseDark);
+      document.documentElement.classList.toggle('dark', shouldUseDark);
       setLoading(false);
     };
 
@@ -45,6 +51,17 @@ const AdminDashboard = () => {
   const handleLogout = () => {
     logoutAdmin();
     navigate('/login');
+  };
+
+  const setTheme = (mode) => {
+    const useDark = mode === 'dark';
+    setIsDarkMode(useDark);
+    document.documentElement.classList.toggle('dark', useDark);
+    localStorage.setItem('theme', mode);
+  };
+
+  const toggleTheme = () => {
+    setTheme(isDarkMode ? 'light' : 'dark');
   };
 
   if (loading) {
@@ -58,31 +75,48 @@ const AdminDashboard = () => {
   const navigationItems = getAdminNavigation(sessionAdmin?.role || '');
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.16),_transparent_22%),radial-gradient(circle_at_top_right,_rgba(59,130,246,0.16),_transparent_25%),linear-gradient(180deg,_#ffffff_0%,_#f7f7ff_45%,_#eef4ff_100%)]">
-      <header className="relative overflow-hidden border-b border-indigo-100 bg-[linear-gradient(135deg,_rgba(238,242,255,0.95),_rgba(255,255,255,0.9))]">
-        <div className="absolute inset-0 bg-[linear-gradient(120deg,transparent_0%,rgba(99,102,241,0.08)_35%,transparent_65%)]" />
+    <div className={`min-h-screen ${
+      isDarkMode
+        ? 'bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.14),_transparent_22%),radial-gradient(circle_at_top_right,_rgba(37,99,235,0.20),_transparent_25%),linear-gradient(180deg,_#0b1f43_0%,_#0d2957_45%,_#103062_100%)]'
+        : 'bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.16),_transparent_22%),radial-gradient(circle_at_top_right,_rgba(59,130,246,0.16),_transparent_25%),linear-gradient(180deg,_#ffffff_0%,_#f7f7ff_45%,_#eef4ff_100%)]'
+    }`}>
+      <header className={`relative overflow-hidden border-b ${isDarkMode ? 'border-sky-800/60 bg-[#112d5b]' : 'border-indigo-100 bg-[linear-gradient(135deg,_rgba(238,242,255,0.95),_rgba(255,255,255,0.9))]'}`}>
+        <div className={`absolute inset-0 ${isDarkMode ? 'bg-[linear-gradient(120deg,transparent_0%,rgba(56,189,248,0.12)_35%,transparent_65%)]' : 'bg-[linear-gradient(120deg,transparent_0%,rgba(99,102,241,0.08)_35%,transparent_65%)]'}`} />
         <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-8 xl:flex-row xl:items-start xl:justify-between">
             <div className="max-w-4xl">
-              <p className="text-sm font-semibold uppercase tracking-[0.38em] text-indigo-600">
+              <p className={`text-sm font-semibold uppercase tracking-[0.38em] ${isDarkMode ? 'text-cyan-300' : 'text-indigo-600'}`}>
                 StepIn Admin Management
               </p>
-              <h1 className="mt-4 max-w-5xl font-serif text-5xl font-black leading-[0.95] text-[#16213b] md:text-6xl">
+              <h1 className={`mt-4 max-w-5xl font-serif text-5xl font-black leading-[0.95] md:text-6xl ${isDarkMode ? 'text-white' : 'text-[#16213b]'}`}>
                 Command center for platform governance and operational access
               </h1>
               {sessionAdmin && (
-                <div className="mt-6 inline-flex flex-wrap items-center gap-3 rounded-full border border-indigo-100 bg-white/90 px-4 py-3 text-sm font-semibold text-[#334155] shadow-sm">
+                <div className={`mt-6 inline-flex flex-wrap items-center gap-3 rounded-full border px-4 py-3 text-sm font-semibold shadow-sm ${isDarkMode ? 'border-sky-800 bg-[#0f294f] text-slate-100' : 'border-indigo-100 bg-white/90 text-[#334155]'}`}>
                   <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-r from-indigo-700 to-blue-600 text-white">
                     {sessionAdmin.fullName?.charAt(0)?.toUpperCase() || 'A'}
                   </span>
                   <span>{sessionAdmin.fullName}</span>
-                  <span className="text-[#94a3b8]">/</span>
-                  <span className="text-indigo-700">{sessionAdmin.role}</span>
+                  <span className={`${isDarkMode ? 'text-slate-400' : 'text-[#94a3b8]'}`}>/</span>
+                  <span className={`${isDarkMode ? 'text-cyan-300' : 'text-indigo-700'}`}>{sessionAdmin.role}</span>
                 </div>
               )}
             </div>
 
             <div className="flex flex-wrap gap-3">
+              <button
+                onClick={toggleTheme}
+                className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-semibold transition ${
+                  isDarkMode
+                    ? 'border-sky-700 bg-[#0f294f] text-cyan-200 hover:bg-[#123564]'
+                    : 'border-indigo-200 bg-white/90 text-indigo-700 hover:bg-indigo-50'
+                }`}
+              >
+                <span className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${isDarkMode ? 'bg-sky-950' : 'bg-slate-200'}`}>
+                  <span className={`absolute h-5 w-5 rounded-full shadow transition-transform ${isDarkMode ? 'translate-x-5 bg-cyan-200' : 'translate-x-1 bg-white'}`} />
+                </span>
+                <span className="text-xs uppercase tracking-[0.12em]">{isDarkMode ? 'Dark Mode' : 'Light Mode'}</span>
+              </button>
               <button
                 onClick={handleLogout}
                 className="rounded-full bg-gradient-to-r from-indigo-700 to-blue-600 px-6 py-3 font-semibold text-white transition hover:from-indigo-800 hover:to-blue-700"
@@ -91,7 +125,7 @@ const AdminDashboard = () => {
               </button>
               <a
                 href="http://localhost:3000/"
-                className="rounded-full border border-indigo-200 bg-white/90 px-6 py-3 font-semibold text-[#334155] transition hover:border-indigo-500 hover:text-indigo-700"
+                className={`rounded-full border px-6 py-3 font-semibold transition ${isDarkMode ? 'border-sky-700 bg-[#0f294f] text-slate-100 hover:border-cyan-400 hover:text-cyan-200' : 'border-indigo-200 bg-white/90 text-[#334155] hover:border-indigo-500 hover:text-indigo-700'}`}
               >
                 Back to Home
               </a>
@@ -102,9 +136,9 @@ const AdminDashboard = () => {
             {quickFacts.map((fact) => (
               <div
                 key={fact.label}
-                className="rounded-[2rem] border border-indigo-100 bg-white/80 px-6 py-5 shadow-[0_12px_30px_rgba(79,70,229,0.08)] backdrop-blur"
+                className={`rounded-[2rem] border px-6 py-5 shadow-[0_12px_30px_rgba(79,70,229,0.08)] backdrop-blur ${isDarkMode ? 'border-sky-800 bg-[#0f294f]/90' : 'border-indigo-100 bg-white/80'}`}
               >
-                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#64748b]">
+                <p className={`text-xs font-semibold uppercase tracking-[0.28em] ${isDarkMode ? 'text-slate-300' : 'text-[#64748b]'}`}>
                   {fact.label}
                 </p>
                 <div className={`mt-3 text-3xl font-black ${fact.tone}`}>{fact.value}</div>
@@ -115,19 +149,19 @@ const AdminDashboard = () => {
       </header>
 
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <section className="rounded-[2rem] border border-indigo-100 bg-white/75 p-6 shadow-[0_24px_60px_rgba(79,70,229,0.08)] backdrop-blur md:p-8">
+        <section className={`rounded-[2rem] border p-6 shadow-[0_24px_60px_rgba(79,70,229,0.08)] backdrop-blur md:p-8 ${isDarkMode ? 'border-sky-800 bg-[#0f294f]/85' : 'border-indigo-100 bg-white/75'}`}>
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.32em] text-indigo-500">
+              <p className={`text-sm font-semibold uppercase tracking-[0.32em] ${isDarkMode ? 'text-cyan-300' : 'text-indigo-500'}`}>
                 Role-Based Access
               </p>
-              <h2 className="mt-3 text-3xl font-black text-[#16213b]">
+              <h2 className={`mt-3 text-3xl font-black ${isDarkMode ? 'text-white' : 'text-[#16213b]'}`}>
                 Your available control rooms
               </h2>
             </div>
 
-            <div className="rounded-3xl border border-indigo-100 bg-indigo-50/80 px-5 py-4 text-sm text-[#475569]">
-              <span className="font-semibold text-[#16213b]">Active modules:</span> {navigationItems.length}
+            <div className={`rounded-3xl border px-5 py-4 text-sm ${isDarkMode ? 'border-sky-700 bg-[#123564] text-slate-200' : 'border-indigo-100 bg-indigo-50/80 text-[#475569]'}`}>
+              <span className={`font-semibold ${isDarkMode ? 'text-cyan-200' : 'text-[#16213b]'}`}>Active modules:</span> {navigationItems.length}
             </div>
           </div>
 
@@ -136,9 +170,13 @@ const AdminDashboard = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`group relative overflow-hidden rounded-[1.75rem] border bg-gradient-to-br p-6 shadow-[0_18px_40px_rgba(15,23,42,0.07)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_55px_rgba(15,23,42,0.12)] ${cardStyles[index % cardStyles.length]}`}
+                className={`group relative overflow-hidden rounded-[1.75rem] border bg-gradient-to-br p-6 shadow-[0_18px_40px_rgba(15,23,42,0.07)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_55px_rgba(15,23,42,0.12)] ${
+                  isDarkMode
+                    ? 'from-[#123564] via-[#103062] to-[#0f294f] border-sky-700/80'
+                    : cardStyles[index % cardStyles.length]
+                }`}
               >
-                <div className="absolute right-4 top-4 text-xs font-bold uppercase tracking-[0.28em] text-[#64748b]">
+                <div className={`absolute right-4 top-4 text-xs font-bold uppercase tracking-[0.28em] ${isDarkMode ? 'text-slate-300' : 'text-[#64748b]'}`}>
                   {String(index + 1).padStart(2, '0')}
                 </div>
 
@@ -152,14 +190,14 @@ const AdminDashboard = () => {
                   {item.label === 'Review Data' && '✦'}
                 </div>
 
-                <h3 className="mt-6 text-3xl font-black leading-tight text-[#16213b]">
+                <h3 className={`mt-6 text-3xl font-black leading-tight ${isDarkMode ? 'text-white' : 'text-[#16213b]'}`}>
                   {item.label}
                 </h3>
-                <p className="mt-3 max-w-xs text-sm leading-7 text-[#475569]">
+                <p className={`mt-3 max-w-xs text-sm leading-7 ${isDarkMode ? 'text-slate-100' : 'text-[#475569]'}`}>
                   Open the {item.label.toLowerCase()} workspace and manage the records available to your role.
                 </p>
 
-                <div className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-indigo-700">
+                <div className={`mt-8 inline-flex items-center gap-2 text-sm font-semibold ${isDarkMode ? 'text-cyan-300' : 'text-indigo-700'}`}>
                   Open module
                   <span className="transition group-hover:translate-x-1">→</span>
                 </div>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './components/HomePage/Home';
 import CompanyRegister from './components/CompanyManagement/C_CompanyRegister';
@@ -11,7 +11,8 @@ import ProAccountUpgrade from './components/PaymentManagement/p_ProAccountUpgrad
 import AdminPaymentManagement from './components/AdminManagement/A_PaymentManagement';
 import StudentLogin from './components/StudentManagement/student_login';
 import StudentRegister from './components/StudentManagement/student_register';
-import StudentDashboard from './components/StudentManagement/student_dashboard';
+import StudentDashboard from './components/StudentManagement/S_Dashboard';
+import StudentJobs from './components/StudentManagement/S_Jobs';
 import StudentProfile from './components/StudentManagement/S_Profile';
 import StudentProfileView from './components/StudentManagement/S_ProfileView';
 import StudentProfileViewCompany from './components/StudentManagement/S_PviewCompany';
@@ -24,6 +25,12 @@ import Login from './pages/Login';
 import './App.css';
 
 function App() {
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    const shouldUseDark = savedTheme === 'dark';
+    document.documentElement.classList.toggle('dark', shouldUseDark);
+  }, []);
+
   return (
     <Router>
       <div className="App min-h-screen bg-white dark:bg-slate-900">
@@ -52,6 +59,7 @@ function App() {
           <Route path="/login/student" element={<StudentLogin />} />
           <Route path="/register/student" element={<StudentRegister />} />
           <Route path="/student/dashboard" element={<StudentDashboard />} />
+          <Route path="/student/jobs" element={<StudentJobs />} />
           <Route path="/student/profile" element={<StudentProfile />} />
           <Route path="/student/profile/view/:id" element={<StudentProfileView />} />
           <Route path="/student/profile/company-view" element={<StudentProfileViewCompany />} />

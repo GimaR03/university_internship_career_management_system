@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+=======
+import React, { useEffect, useMemo, useState } from "react";
+>>>>>>> main
 import axios from "axios";
 import AdminLayout from "./admin_layout";
 import { PAGE_ACCESS } from "./admin_utils";
@@ -47,6 +51,7 @@ const STATUS_STYLES = {
   rejected: "bg-rose-100 text-rose-700"
 };
 
+<<<<<<< HEAD
 const formatStatusLabel = (status) => {
   if (status === "verified") return "Verified";
   if (status === "pending") return "Pending";
@@ -54,6 +59,8 @@ const formatStatusLabel = (status) => {
   return "Pending";
 };
 
+=======
+>>>>>>> main
 const PAYMENT_LABELS = {
   internship_post: "Internship Post",
   pro_account: "Pro Account",
@@ -130,6 +137,7 @@ const A_PaymentManagement = () => {
     setAdminSession(getStoredAdminSession());
   }, []);
 
+<<<<<<< HEAD
   const fetchPayments = useCallback(async () => {
     setLoading(true);
     setError("");
@@ -148,6 +156,30 @@ const A_PaymentManagement = () => {
       fetchPayments();
     }
   }, [adminSession, fetchPayments]);
+=======
+  const fetchPayments = async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const apiEndpoint = adminSession?.token ? `${API_URL}/payments/admin` : `${API_URL}/payments/all`;
+      const config = adminSession?.token ? authConfig : {};
+
+      const response = await axios.get(apiEndpoint, config);
+      setPayments(Array.isArray(response.data?.data) ? response.data.data : []);
+    } catch (err) {
+      console.error("Payment fetch error:", err);
+      setError(err.response?.data?.message || "Failed to load payments");
+      setPayments([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPayments();
+  }, [adminSession, authConfig]);
+>>>>>>> main
 
   const handleStatusChange = async (paymentId, status) => {
     setActionLoadingId(paymentId);
@@ -155,6 +187,7 @@ const A_PaymentManagement = () => {
     setSuccess("");
 
     try {
+<<<<<<< HEAD
       const response = await axios.put(
         `${API_URL}/payments/${paymentId}/status`,
         { status },
@@ -174,6 +207,11 @@ const A_PaymentManagement = () => {
         )
       );
       setSuccess(`Payment marked as ${status}.`);
+=======
+      await axios.put(`${API_URL}/payments/${paymentId}/status`, { status }, authConfig);
+      setSuccess(`Payment marked as ${status}.`);
+      await fetchPayments();
+>>>>>>> main
     } catch (err) {
       setError(err.response?.data?.message || "Failed to update payment");
     } finally {
@@ -237,6 +275,7 @@ const A_PaymentManagement = () => {
         : "bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
     }`;
 
+<<<<<<< HEAD
   if (!adminSession?.token) {
     return (
       <AdminLayout
@@ -250,6 +289,9 @@ const A_PaymentManagement = () => {
       </AdminLayout>
     );
   }
+=======
+  const isAdmin = Boolean(adminSession?.token);
+>>>>>>> main
 
   return (
     <AdminLayout
@@ -257,6 +299,15 @@ const A_PaymentManagement = () => {
       description="Record, review, and update all company and student payments from one admin workspace."
       allowedRoles={PAGE_ACCESS.payments}
     >
+<<<<<<< HEAD
+=======
+      {!isAdmin ? (
+        <div className="mx-auto max-w-4xl rounded-2xl border border-amber-200 bg-amber-50 p-6 text-amber-900 shadow-sm mb-6">
+          <p className="font-semibold">Note: Admin login not detected.</p>
+          <p>Payment records are read-only and filtered to accessible data. Log in as admin for full management actions.</p>
+        </div>
+      ) : null}
+>>>>>>> main
       <div className="space-y-6">
         <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-6 md:p-8">
           <div className="grid gap-4 md:grid-cols-4">
@@ -464,8 +515,25 @@ const A_PaymentManagement = () => {
 
           {loading ? (
             <div className="py-12 text-center text-slate-600">Loading payments...</div>
+<<<<<<< HEAD
           ) : filteredPayments.length === 0 ? (
             <div className="py-12 text-center text-slate-600">No payments found for the selected filters.</div>
+=======
+          ) : error ? (
+            <div className="rounded-lg bg-rose-50 p-4 text-rose-700 border border-rose-200">
+              <p className="font-semibold">Error loading payments:</p>
+              <p className="text-sm mt-1">{error}</p>
+            </div>
+          ) : filteredPayments.length === 0 ? (
+            <div className="py-12 text-center">
+              <p className="text-slate-600 text-lg">No payments found for the selected filters.</p>
+              <p className="text-slate-500 text-sm mt-3">Payments will appear here when:</p>
+              <ul className="text-slate-500 text-sm mt-2 space-y-1">
+                <li>• Companies submit payment slips from the payment upload page</li>
+                <li>• You manually add payment records using the form above</li>
+              </ul>
+            </div>
+>>>>>>> main
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full border-separate border-spacing-y-2 text-sm text-slate-700">
@@ -522,7 +590,11 @@ const A_PaymentManagement = () => {
                       </td>
                       <td className="px-3 py-4">
                         <span className={`rounded-full px-2 py-1 text-xs font-semibold ${STATUS_STYLES[payment.status] || STATUS_STYLES.pending}`}>
+<<<<<<< HEAD
                           {formatStatusLabel(payment.status)}
+=======
+                          {payment.status}
+>>>>>>> main
                         </span>
                       </td>
                       <td className="px-3 py-4">
