@@ -2,9 +2,15 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
+const fs = require('fs');
 const connectDB = require('./config/db');
 
-dotenv.config();
+const envPath = path.join(__dirname, '.env');
+const exampleEnvPath = path.join(__dirname, '.env.example');
+
+dotenv.config({
+    path: fs.existsSync(envPath) ? envPath : exampleEnvPath
+});
 
 const app = express();
 
