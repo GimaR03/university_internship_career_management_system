@@ -30,9 +30,20 @@ const C_CompanyRegister = () => {
     const companySizes = ['1-10', '11-50', '51-200', '201-500', '500+'];
 
     const handleChange = (e) => {
+        const { name, value } = e.target;
+
+        if (name === 'phone') {
+            const digitsOnly = value.replace(/\D/g, '').slice(0, 10);
+            setFormData({
+                ...formData,
+                phone: digitsOnly
+            });
+            return;
+        }
+
         setFormData({
             ...formData,
-            [e.target.name]: e.target.value
+            [name]: value
         });
     };
 
@@ -46,6 +57,11 @@ const C_CompanyRegister = () => {
         
         if (formData.password.length < 6) {
             setError('Password must be at least 6 characters');
+            return;
+        }
+
+        if (!/^\d{10}$/.test(formData.phone)) {
+            setError('Phone number must contain exactly 10 digits');
             return;
         }
         
@@ -167,6 +183,10 @@ const C_CompanyRegister = () => {
                                     value={formData.phone}
                                     onChange={handleChange}
                                     required
+                                    inputMode="numeric"
+                                    pattern="[0-9]{10}"
+                                    maxLength={10}
+                                    title="Enter exactly 10 digits"
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                 />
                             </div>
