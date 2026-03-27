@@ -41,7 +41,7 @@ const dashboardCards = [
     icon: <FaSearch />,
     title: "Search Jobs",
     desc: "Find internships by field, location, and job type.",
-    actionKey: "jobs",
+    actionKey: "searchJobs",
     btn: "Search Jobs",
   },
   {
@@ -62,7 +62,7 @@ const dashboardCards = [
     icon: <FaChartLine />,
     title: "Recommendations",
     desc: "Open your CV analysis page and view the jobs matched to your profile.",
-    actionKey: "jobs",
+    actionKey: "recommendations",
     btn: "View CV Analysis",
   },
 ];
@@ -122,9 +122,11 @@ function S_Dashboard() {
   const cardActions = {
     profile: openStudentProfile,
     companies: openCompanyProfileView,
+    searchJobs: () => navigate("/student/search-jobs"),
     jobs: () => navigate("/student/jobs"),
-    apply: () => navigate("/student/jobs"),
+    apply: () => navigate("/student/apply-jobs"),
     applications: () => navigate("/student/applications"),
+    recommendations: () => navigate("/student/jobs"),
   };
 
   useEffect(() => {

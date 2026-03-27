@@ -13,6 +13,9 @@ import StudentLogin from './components/StudentManagement/student_login';
 import StudentRegister from './components/StudentManagement/student_register';
 import StudentDashboard from './components/StudentManagement/S_Dashboard';
 import StudentJobs from './components/StudentManagement/S_Jobs';
+import StudentApplications from './components/StudentManagement/S_Applications';
+import StudentSearchJobs from './components/StudentManagement/S_SearchJobs';
+import StudentApplyJobs from './components/StudentManagement/S_ApplyJobs';
 import StudentProfile from './components/StudentManagement/S_Profile';
 import StudentProfileView from './components/StudentManagement/S_ProfileView';
 import StudentProfileViewCompany from './components/StudentManagement/S_PviewCompany';
@@ -60,6 +63,12 @@ function App() {
           <Route path="/register/student" element={<StudentRegister />} />
           <Route path="/student/dashboard" element={<StudentDashboard />} />
           <Route path="/student/jobs" element={<StudentJobs />} />
+          <Route path="/student/search-jobs" element={<StudentSearchJobs />} />
+          <Route path="/student/applications" element={<StudentApplications />} />
+          <Route path="/student/apply-jobs" element={<StudentApplyJobs />} />
+          <Route path="/student/search-jobs" element={<StudentSearchJobs />} />
+          <Route path="/student/applications" element={<StudentApplications />} />
+          <Route path="/student/apply-jobs" element={<StudentApplyJobs />} />
           <Route path="/student/profile" element={<StudentProfile />} />
           <Route path="/student/profile/view/:id" element={<StudentProfileView />} />
           <Route path="/student/profile/company-view" element={<StudentProfileViewCompany />} />
