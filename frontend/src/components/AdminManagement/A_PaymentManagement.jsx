@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 
 const API_URL = "http://localhost:5000/api";
@@ -119,7 +119,7 @@ const A_PaymentManagement = () => {
     payment.payerType === "student" ? payment.studentName || "-" : payment.companyName || "-"
   );
 
-  const fetchPayments = async () => {
+  const fetchPayments = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
@@ -132,7 +132,7 @@ const A_PaymentManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [authConfig]);
 
   useEffect(() => {
     setAdminSession(getStoredAdminSession());
@@ -142,7 +142,7 @@ const A_PaymentManagement = () => {
     if (adminSession?.token) {
       fetchPayments();
     }
-  }, [adminSession]);
+  }, [adminSession, fetchPayments]);
 
   const handleStatusChange = async (paymentId, status) => {
     setActionLoadingId(paymentId);

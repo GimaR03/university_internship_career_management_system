@@ -12,7 +12,7 @@ import AdminPaymentManagement from './components/AdminManagement/A_PaymentManage
 import StudentLogin from './components/StudentManagement/student_login';
 import StudentRegister from './components/StudentManagement/student_register';
 import StudentDashboard from './components/StudentManagement/S_Dashboard';
-import StudentJobs from './components/StudentManagement/S_Jobs';
+import StudentJobs from './components/StudentManagement/S_JobsAnalysis';
 import StudentApplications from './components/StudentManagement/S_Applications';
 import StudentSearchJobs from './components/StudentManagement/S_SearchJobs';
 import StudentApplyJobs from './components/StudentManagement/S_ApplyJobs';
