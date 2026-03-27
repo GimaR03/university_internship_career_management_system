@@ -9,6 +9,7 @@ import AdminInternshipPage from './components/AdminManagement/admin_internship_p
 import AdminPaymentPage from './components/AdminManagement/admin_payment_page';
 import AdminRegistryPage from './components/AdminManagement/admin_registry_page';
 import AdminReviewPage from './components/AdminManagement/admin_review_page';
+import AdminStudentPage from './components/AdminManagement/admin_student_page';
 import './App.css';
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
           <Route path="/create" element={<AdminCreatePage />} />
           <Route path="/registry" element={<AdminRegistryPage />} />
           <Route path="/companies" element={<AdminCompanyPage />} />
+          <Route path="/students" element={<AdminStudentPage />} />
           <Route path="/internships" element={<AdminInternshipPage />} />
           <Route path="/payments" element={<AdminPaymentPage />} />
           <Route path="/reviews" element={<AdminReviewPage />} />

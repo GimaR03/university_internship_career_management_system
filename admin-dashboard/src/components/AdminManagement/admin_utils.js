@@ -31,6 +31,7 @@ export const ADMIN_ROLES = [
   'Super Admin',
   'Admin Manager',
   'Company Manager',
+  'Student Manager',
   'Internship Manager',
   'Payment Manager',
   'Review Admin',
@@ -41,6 +42,7 @@ export const PAGE_ACCESS = {
   createAdmin: ['Super Admin', 'Admin Manager'],
   adminRegistry: ['Super Admin', 'Admin Manager'],
   companies: ['Super Admin', 'Company Manager'],
+  students: ['Super Admin', 'Student Manager'],
   internships: ['Super Admin', 'Internship Manager'],
   payments: ['Super Admin', 'Payment Manager'],
   reviews: ['Super Admin', 'Review Admin'],
@@ -54,6 +56,7 @@ export const getAdminNavigation = (role) => {
     { label: 'Create Admin', path: '/create', accessKey: 'createAdmin' },
     { label: 'Admin Registry', path: '/registry', accessKey: 'adminRegistry' },
     { label: 'Company Data', path: '/companies', accessKey: 'companies' },
+    { label: 'Student Data', path: '/students', accessKey: 'students' },
     { label: 'Internship Data', path: '/internships', accessKey: 'internships' },
     { label: 'Payment Data', path: '/payments', accessKey: 'payments' },
     { label: 'Review Data', path: '/reviews', accessKey: 'reviews' },
@@ -63,19 +66,31 @@ export const getAdminNavigation = (role) => {
 };
 
 export const loginAdmin = async (email, password) => {
-  const response = await api.post(`${ADMIN_API_URL}/login`, { email, password });
-  const admin = response.data?.data || response.data?.admin || response.data;
+  try {
+    const response = await api.post(`${ADMIN_API_URL}/login`, { email, password });
+    const admin = response.data?.data || response.data?.admin || response.data;
 
-  localStorage.setItem(
-    ADMIN_SESSION_KEY,
-    JSON.stringify({
-      token: response.data?.token,
-      admin: mapAdmin(admin, 0),
-      source: 'backend',
-    })
-  );
+    localStorage.setItem(
+      ADMIN_SESSION_KEY,
+      JSON.stringify({
+        token: response.data?.token,
+        admin: mapAdmin(admin, 0),
+        source: 'backend',
+      })
+    );
 
-  return { success: true, source: 'backend', data: mapAdmin(admin, 0) };
+    return { success: true, source: 'backend', data: mapAdmin(admin, 0) };
+  } catch (error) {
+    if (error.response?.data?.message) {
+      throw new Error(error.response.data.message);
+    }
+
+    if (error.request) {
+      throw new Error('Cannot reach the backend server at http://localhost:5000. Make sure the backend is running.');
+    }
+
+    throw new Error(error.message || 'Admin login failed');
+  }
 };
 
 export const getAdminSession = () => {
@@ -186,6 +201,23 @@ export const RESOURCE_CONFIGS = {
       { name: 'description', label: 'Description', type: 'text', required: false },
     ],
     columns: ['companyName', 'email', 'industry', 'phone', 'address', 'website'],
+  },
+  students: {
+    title: 'Student Data',
+    description: 'View, add, update, and delete student profile records.',
+    endpoint: 'students',
+    allowedRoles: PAGE_ACCESS.students,
+    fields: [
+      { name: 'firstName', label: 'First Name', type: 'text', required: true },
+      { name: 'lastName', label: 'Last Name', type: 'text', required: true },
+      { name: 'email', label: 'Email', type: 'email', required: true },
+      { name: 'contactNumber', label: 'Contact Number', type: 'text', required: false },
+      { name: 'district', label: 'District', type: 'text', required: false },
+      { name: 'university', label: 'University', type: 'text', required: false },
+      { name: 'degree', label: 'Degree', type: 'text', required: false },
+      { name: 'preferredField', label: 'Preferred Field', type: 'text', required: false },
+    ],
+    columns: ['firstName', 'lastName', 'email', 'contactNumber', 'district', 'university', 'preferredField'],
   },
   internships: {
     title: 'Internship Data',

@@ -25,6 +25,7 @@ const adminSchema = new mongoose.Schema(
         'Super Admin',
         'Admin Manager',
         'Company Manager',
+        'Student Manager',
         'Internship Manager',
         'Payment Manager',
         'Review Admin',

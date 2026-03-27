@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 const Admin = require('../models/adminModel');
 
 const sanitizeAdmin = (adminDoc) => ({
@@ -17,10 +18,12 @@ const ALLOWED_ADMIN_ROLES = [
   'Super Admin',
   'Admin Manager',
   'Company Manager',
+  'Student Manager',
   'Internship Manager',
   'Payment Manager',
   'Review Admin',
 ];
+const FIXED_ADMIN_DEPARTMENT = 'Admin Management';
 
 const validateAdminPayload = ({ fullName, email, password, role }) => {
   if (!fullName || !fullName.trim()) return 'Full name is required';
@@ -61,7 +64,7 @@ exports.createAdmin = async (req, res) => {
       email: normalizedEmail,
       password: hashedPassword,
       role: adminCount === 0 ? 'Super Admin' : req.body.role.trim(),
-      department: req.body.department?.trim() || 'Admin Management',
+      department: FIXED_ADMIN_DEPARTMENT,
       status: req.body.status || 'Active',
     });
 
@@ -79,6 +82,13 @@ exports.createAdmin = async (req, res) => {
 
 exports.loginAdmin = async (req, res) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({
+        success: false,
+        message: 'Admin login is unavailable because the database connection is down.',
+      });
+    }
+
     const { email, password } = req.body;
 
     if (!email || !password) {

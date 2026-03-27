@@ -1,6 +1,7 @@
 const Company = require('../models/c_companyModel');
 const Internship = require('../models/c_internshipModel');
 const Payment = require('../models/p_paymentModel');
+const StudentProfile = require('../models/s_ProfileModel');
 
 const createCrudHandlers = (Model, entityName) => ({
   list: async (req, res) => {
@@ -55,11 +56,17 @@ const createCrudHandlers = (Model, entityName) => ({
 const companyHandlers = createCrudHandlers(Company, 'Company');
 const internshipHandlers = createCrudHandlers(Internship, 'Internship');
 const paymentHandlers = createCrudHandlers(Payment, 'Payment');
+const studentHandlers = createCrudHandlers(StudentProfile, 'Student');
 
 exports.getCompanies = companyHandlers.list;
 exports.createCompany = companyHandlers.create;
 exports.updateCompany = companyHandlers.update;
 exports.deleteCompany = companyHandlers.remove;
+
+exports.getStudents = studentHandlers.list;
+exports.createStudent = studentHandlers.create;
+exports.updateStudent = studentHandlers.update;
+exports.deleteStudent = studentHandlers.remove;
 
 exports.getInternships = async (req, res) => {
   try {
