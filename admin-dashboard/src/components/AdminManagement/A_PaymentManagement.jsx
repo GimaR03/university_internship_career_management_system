@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import AdminLayout from "./admin_layout";
 import { PAGE_ACCESS } from "./admin_utils";
@@ -47,6 +47,12 @@ const STATUS_STYLES = {
   rejected: "bg-rose-100 text-rose-700"
 };
 
+const formatStatusLabel = (status) => {
+  if (status === "verified") return "Verified";
+  if (status === "pending") return "Pending";
+  if (status === "rejected") return "Rejected";
+  return "Pending";
+};
 const PAYMENT_LABELS = {
   internship_post: "Internship Post",
   pro_account: "Pro Account",
@@ -123,28 +129,24 @@ const A_PaymentManagement = () => {
     setAdminSession(getStoredAdminSession());
   }, []);
 
-  const fetchPayments = async () => {
+  const fetchPayments = useCallback(async () => {
     setLoading(true);
     setError("");
-
     try {
-      const apiEndpoint = adminSession?.token ? `${API_URL}/payments/admin` : `${API_URL}/payments/all`;
-      const config = adminSession?.token ? authConfig : {};
-
-      const response = await axios.get(apiEndpoint, config);
+      const response = await axios.get(`${API_URL}/payments/admin`, authConfig);
       setPayments(Array.isArray(response.data?.data) ? response.data.data : []);
     } catch (err) {
-      console.error("Payment fetch error:", err);
       setError(err.response?.data?.message || "Failed to load payments");
-      setPayments([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [authConfig]);
 
   useEffect(() => {
-    fetchPayments();
-  }, [adminSession, authConfig]);
+    if (adminSession?.token) {
+      fetchPayments();
+    }
+  }, [adminSession, fetchPayments]);
 
   const handleStatusChange = async (paymentId, status) => {
     setActionLoadingId(paymentId);
@@ -152,9 +154,25 @@ const A_PaymentManagement = () => {
     setSuccess("");
 
     try {
-      await axios.put(`${API_URL}/payments/${paymentId}/status`, { status }, authConfig);
+      const response = await axios.put(
+        `${API_URL}/payments/${paymentId}/status`,
+        { status },
+        authConfig
+      );
+
+      const updatedPayment = response.data?.data;
+      setPayments((current) =>
+        current.map((payment) =>
+          payment._id === paymentId
+            ? {
+                ...payment,
+                ...(updatedPayment || {}),
+                status
+              }
+            : payment
+        )
+      );
       setSuccess(`Payment marked as ${status}.`);
-      await fetchPayments();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to update payment");
     } finally {
@@ -218,7 +236,19 @@ const A_PaymentManagement = () => {
         : "bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
     }`;
 
-  const isAdmin = Boolean(adminSession?.token);
+  if (!adminSession?.token) {
+    return (
+      <AdminLayout
+        title="Payment Data"
+        description="Manage company and student payment records."
+        allowedRoles={PAGE_ACCESS.payments}
+      >
+        <div className="mx-auto max-w-4xl rounded-2xl border border-amber-200 bg-amber-50 p-6 text-amber-900 shadow-sm">
+          Admin login is required to manage payment records.
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout
@@ -226,12 +256,6 @@ const A_PaymentManagement = () => {
       description="Record, review, and update all company and student payments from one admin workspace."
       allowedRoles={PAGE_ACCESS.payments}
     >
-      {!isAdmin ? (
-        <div className="mx-auto max-w-4xl rounded-2xl border border-amber-200 bg-amber-50 p-6 text-amber-900 shadow-sm mb-6">
-          <p className="font-semibold">Note: Admin login not detected.</p>
-          <p>Payment records are read-only and filtered to accessible data. Log in as admin for full management actions.</p>
-        </div>
-      ) : null}
       <div className="space-y-6">
         <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-6 md:p-8">
           <div className="grid gap-4 md:grid-cols-4">
@@ -509,7 +533,7 @@ const A_PaymentManagement = () => {
                       </td>
                       <td className="px-3 py-4">
                         <span className={`rounded-full px-2 py-1 text-xs font-semibold ${STATUS_STYLES[payment.status] || STATUS_STYLES.pending}`}>
-                          {payment.status}
+                          {formatStatusLabel(payment.status)}
                         </span>
                       </td>
                       <td className="px-3 py-4">

@@ -39,6 +39,13 @@ const C_InternshipList = ({ internships, onUpdate }) => {
     const [editForm, setEditForm] = useState({});
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
 
+    const normalizeVerificationStatus = (status) => {
+        if (status === 'verified') return 'verified';
+        if (status === 'rejected') return 'rejected';
+        if (status === 'pending') return 'pending';
+        return 'pending';
+    };
+
     const totalInternships = internships.length;
     const activeInternships = internships.filter((item) => item.status === 'active').length;
     const totalApplications = internships.reduce((sum, item) => sum + (item.applications?.length || 0), 0);
@@ -83,17 +90,19 @@ const C_InternshipList = ({ internships, onUpdate }) => {
     };
 
     const getVerificationLabel = (status) => {
-        if (status === 'verified') return 'Verified';
-        if (status === 'pending') return 'Pending Verification';
-        if (status === 'rejected') return 'Rejected';
-        return 'Not Verified';
+        const normalizedStatus = normalizeVerificationStatus(status);
+
+        if (normalizedStatus === 'verified') return 'Verified';
+        if (normalizedStatus === 'rejected') return 'Rejected';
+        return 'Pending';
     };
 
     const getVerificationColor = (status) => {
-        if (status === 'verified') return 'text-emerald-700 bg-emerald-100';
-        if (status === 'pending') return 'text-amber-700 bg-amber-100';
-        if (status === 'rejected') return 'text-rose-700 bg-rose-100';
-        return 'text-slate-700 bg-slate-100';
+        const normalizedStatus = normalizeVerificationStatus(status);
+
+        if (normalizedStatus === 'verified') return 'text-emerald-700 bg-emerald-100';
+        if (normalizedStatus === 'rejected') return 'text-rose-700 bg-rose-100';
+        return 'text-amber-700 bg-amber-100';
     };
 
     const getThumbnail = (images) => {
