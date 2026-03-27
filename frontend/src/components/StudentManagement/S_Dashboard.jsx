@@ -13,6 +13,15 @@ import { resolveUploadUrl } from "./uploadUrl";
 
 const PROFILE_API_BASE_URL = "http://localhost:5000/api/profiles";
 
+const cardStyles = [
+  "from-[#ede9fe] via-[#f7f5ff] to-white border-[#d8d1fa]",
+  "from-[#e0e7ff] via-[#f5f7ff] to-white border-[#cdd7ff]",
+  "from-[#dbeafe] via-[#f4f9ff] to-white border-[#c6dcff]",
+  "from-[#eef2ff] via-[#fafaff] to-white border-[#dbe2ff]",
+  "from-[#f3e8ff] via-[#fdf7ff] to-white border-[#ead4ff]",
+  "from-[#e9edff] via-[#fbfbff] to-white border-[#d8defe]",
+];
+
 const dashboardCards = [
   {
     icon: <FaUser />,
@@ -149,14 +158,14 @@ function S_Dashboard() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.18),_transparent_35%),linear-gradient(135deg,_#eef2ff_0%,_#f8fafc_45%,_#fdf2f8_100%)] font-sans">
-      <div className="border-b border-white/60 bg-white/70 px-6 py-4 shadow-sm backdrop-blur-xl">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.18),_transparent_35%),linear-gradient(135deg,_#eef2ff_0%,_#f8fafc_45%,_#fdf2f8_100%)] font-sans dark:bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.12),_transparent_35%),linear-gradient(135deg,_#020617_0%,_#0f172a_45%,_#111827_100%)]">
+      <div className="border-b border-white/60 bg-white/70 px-6 py-4 shadow-sm backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/70">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="bg-gradient-to-r from-slate-900 via-indigo-700 to-fuchsia-600 bg-clip-text text-3xl font-black text-transparent">
+            <h1 className="text-3xl font-black text-slate-900 dark:text-white">
               Student Dashboard
             </h1>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-500 dark:text-slate-300">
               Clear career progress, profile access, and recommendation insights in one place.
             </p>
           </div>
@@ -164,7 +173,7 @@ function S_Dashboard() {
           <div className="flex items-center gap-4">
             <div
               onClick={openStudentProfile}
-              className="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-200/70 bg-white/85 px-3 py-2 shadow-sm transition hover:-translate-y-0.5 hover:bg-white"
+              className="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-200/70 bg-white/85 px-3 py-2 shadow-sm transition hover:-translate-y-0.5 hover:bg-white dark:border-slate-700 dark:bg-slate-900/80 dark:hover:bg-slate-900"
             >
               {student.profileImage ? (
                 <img
@@ -179,10 +188,10 @@ function S_Dashboard() {
               )}
 
               <div>
-                <p className="text-xs uppercase tracking-[0.22em] text-slate-400">
+                <p className="text-xs uppercase tracking-[0.22em] text-slate-400 dark:text-slate-400">
                   Student
                 </p>
-                <span className="font-semibold text-slate-700">
+                <span className="font-semibold text-slate-700 dark:text-slate-100">
                   {student.firstName} {student.lastName}
                 </span>
               </div>
@@ -212,17 +221,19 @@ function S_Dashboard() {
           {dashboardCards.map((card, index) => (
             <div
               key={index}
-              className="rounded-[26px] border border-white/70 bg-white/75 p-5 shadow-[0_16px_40px_rgba(148,163,184,0.14)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(79,70,229,0.12)]"
+              className={`rounded-[26px] border bg-gradient-to-br p-5 shadow-[0_16px_40px_rgba(148,163,184,0.14)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(79,70,229,0.12)] ${
+                cardStyles[index % cardStyles.length]
+              } dark:from-[#123564] dark:via-[#103062] dark:to-[#0f294f] dark:border-sky-700/80 dark:shadow-[0_16px_40px_rgba(15,23,42,0.5)]`}
             >
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-100 via-white to-fuchsia-100 text-xl text-indigo-600">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-700 to-blue-600 text-xl text-white shadow-lg">
                 {card.icon}
               </div>
 
-              <h2 className="mb-2 text-lg font-bold text-slate-900">
+              <h2 className="mb-2 text-lg font-bold text-[#16213b] dark:text-white">
                 {card.title}
               </h2>
 
-              <p className="mb-5 text-sm leading-6 text-slate-500">
+              <p className="mb-5 text-sm leading-6 text-[#475569] dark:text-slate-100">
                 {card.desc}
               </p>
 

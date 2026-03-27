@@ -15,28 +15,6 @@ const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  const openAdminPayments = () => {
-    const existing = localStorage.getItem('adminSession');
-    let session = null;
-
-    if (existing) {
-      try {
-        session = JSON.parse(existing);
-      } catch (error) {
-        session = null;
-      }
-    }
-
-    const adminSession = {
-      name: session?.name || 'System Admin',
-      email: session?.email || 'admin@internix.local',
-      lastLoginAt: new Date().toISOString()
-    };
-
-    localStorage.setItem('adminSession', JSON.stringify(adminSession));
-    navigate('/admin/payments');
-  };
-
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
     const shouldUseDark =
@@ -47,14 +25,40 @@ const Header = () => {
     document.documentElement.classList.toggle('dark', shouldUseDark);
   }, []);
 
-  const toggleTheme = () => {
-    setIsDarkMode((prev) => {
-      const next = !prev;
-      document.documentElement.classList.toggle('dark', next);
-      localStorage.setItem('theme', next ? 'dark' : 'light');
-      return next;
-    });
+  const setTheme = (mode) => {
+    const useDark = mode === 'dark';
+    setIsDarkMode(useDark);
+    document.documentElement.classList.toggle('dark', useDark);
+    localStorage.setItem('theme', mode);
   };
+
+  const toggleTheme = () => {
+    setTheme(isDarkMode ? 'light' : 'dark');
+  };
+
+  const renderThemeToggle = (compact = false) => (
+    <button
+      type="button"
+      onClick={toggleTheme}
+      aria-label="Toggle light and dark mode"
+      className={`inline-flex items-center gap-2 rounded-lg border px-2 py-1.5 transition ${compact ? 'scale-95' : ''} ${
+        isDarkMode
+          ? 'border-slate-600 bg-slate-800 text-cyan-200 hover:bg-slate-700'
+          : 'border-indigo-200 bg-white text-indigo-700 hover:bg-indigo-50'
+      }`}
+    >
+      <span className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${isDarkMode ? 'bg-slate-950' : 'bg-slate-200'}`}>
+        <span
+          className={`absolute h-5 w-5 rounded-full shadow transition-transform ${
+            isDarkMode ? 'translate-x-5 bg-cyan-200' : 'translate-x-1 bg-white'
+          }`}
+        />
+      </span>
+      <span className="text-[10px] font-bold uppercase tracking-[0.15em] sm:text-xs">
+        {isDarkMode ? 'Dark Mode' : 'Light Mode'}
+      </span>
+    </button>
+  );
 
   return (
     <header className={`sticky top-0 z-50 border-b backdrop-blur-md ${
@@ -74,18 +78,7 @@ const Header = () => {
         </Link>
 
         <div className="flex items-center gap-2 md:hidden">
-          <button
-            type="button"
-            className={`rounded-md px-3 py-2 text-xs font-semibold transition ${
-              isDarkMode
-                ? 'border border-slate-600 text-slate-100 hover:bg-slate-800'
-                : 'border border-indigo-200 text-indigo-700 hover:bg-indigo-50'
-            }`}
-            onClick={toggleTheme}
-            aria-label="Toggle dark mode"
-          >
-            {isDarkMode ? 'Light' : 'Dark'}
-          </button>
+          {renderThemeToggle(true)}
 
           <button
             type="button"
@@ -100,21 +93,7 @@ const Header = () => {
         </div>
 
         <nav className="hidden items-center gap-2 md:flex">
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition ${
-              isDarkMode
-                ? 'border border-slate-600 text-slate-100 hover:bg-slate-800'
-                : 'border border-indigo-200 text-indigo-700 hover:bg-indigo-50'
-            }`}
-            aria-label="Toggle dark mode"
-          >
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646a9 9 0 1011.708 11.708z" />
-            </svg>
-            {isDarkMode ? 'Light Mode' : 'Dark Mode'}
-          </button>
+          {renderThemeToggle()}
 
           {navItems.map((item) => (
             <NavLink
@@ -135,17 +114,6 @@ const Header = () => {
               {item.label}
             </NavLink>
           ))}
-          <button
-            type="button"
-            onClick={openAdminPayments}
-            className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
-              isDarkMode
-                ? 'border border-slate-600 text-slate-100 hover:bg-slate-800'
-                : 'border border-emerald-200 text-emerald-700 hover:bg-emerald-50'
-            }`}
-          >
-            Admin Payments
-          </button>
           <NavLink
             to="/login"
             className={({ isActive }) =>
@@ -189,20 +157,7 @@ const Header = () => {
                 {item.label}
               </NavLink>
             ))}
-            <button
-              type="button"
-              onClick={() => {
-                setMenuOpen(false);
-                openAdminPayments();
-              }}
-              className={`rounded-lg px-3 py-2 text-sm font-semibold text-left ${
-                isDarkMode
-                  ? 'border border-slate-600 text-slate-100 hover:bg-slate-800'
-                  : 'border border-emerald-200 text-emerald-700 hover:bg-emerald-50'
-              }`}
-            >
-              Admin Payments
-            </button>
+
             <NavLink
               to="/login"
               onClick={() => setMenuOpen(false)}

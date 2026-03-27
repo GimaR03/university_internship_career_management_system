@@ -59,6 +59,15 @@ const internshipSchema = new mongoose.Schema({
     enum: ['active', 'closed'],
     default: 'active',
   },
+  paymentVerificationStatus: {
+    type: String,
+    enum: ['pending', 'verified', 'rejected'],
+    default: 'pending',
+  },
+  paymentVerifiedAt: {
+    type: Date,
+    default: null,
+  },
   applications: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Application',

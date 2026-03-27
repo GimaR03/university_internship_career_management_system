@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './components/HomePage/Home';
 import CompanyRegister from './components/CompanyManagement/C_CompanyRegister';
@@ -25,6 +25,12 @@ import Login from './pages/Login';
 import './App.css';
 
 function App() {
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    const shouldUseDark = savedTheme === 'dark';
+    document.documentElement.classList.toggle('dark', shouldUseDark);
+  }, []);
+
   return (
     <Router>
       <div className="App min-h-screen bg-white dark:bg-slate-900">

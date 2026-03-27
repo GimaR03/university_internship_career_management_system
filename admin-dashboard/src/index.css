@@ -7,8 +7,83 @@
 
 /* Custom base styles */
 @layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
   body {
     @apply font-sans;
+    background-color: #ffffff;
+    color: #0f172a;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  html.dark body,
+  html.dark #root {
+    background-color: #0b1f43;
+    color: #e2e8f0;
+  }
+
+  html.dark .bg-white {
+    background-color: #0f294f !important;
+  }
+
+  html.dark .text-slate-900 {
+    color: #f8fafc !important;
+  }
+
+  html.dark .text-slate-700,
+  html.dark .text-slate-600,
+  html.dark .text-slate-500 {
+    color: #cbd5e1 !important;
+  }
+
+  html.dark .border-slate-200,
+  html.dark .border-indigo-100,
+  html.dark .border-indigo-200 {
+    border-color: #365889 !important;
+  }
+
+  html.dark .bg-indigo-50,
+  html.dark .bg-slate-50 {
+    background-color: #123564 !important;
+  }
+
+  html.dark input,
+  html.dark select,
+  html.dark textarea {
+    background-color: #102b53 !important;
+    color: #e2e8f0 !important;
+    border-color: #3f6798 !important;
+  }
+
+  html.dark input::placeholder,
+  html.dark textarea::placeholder {
+    color: #93aed1 !important;
+  }
+
+  html.dark table {
+    background-color: #102b53 !important;
+    color: #e2e8f0 !important;
+  }
+
+  html.dark thead,
+  html.dark tbody,
+  html.dark tr,
+  html.dark th,
+  html.dark td {
+    color: #e2e8f0 !important;
+    border-color: #3f6798 !important;
+  }
+
+  html.dark tr.bg-slate-50,
+  html.dark tr.bg-white,
+  html.dark .bg-white\/80,
+  html.dark .bg-white\/75,
+  html.dark .bg-white\/90 {
+    background-color: #123564 !important;
   }
 }
 

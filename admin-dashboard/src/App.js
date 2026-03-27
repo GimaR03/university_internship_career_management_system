@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import AdminCompanyPage from './components/AdminManagement/admin_company_page';
 import AdminLogin from './components/AdminManagement/admin_login';
@@ -12,9 +12,15 @@ import AdminReviewPage from './components/AdminManagement/admin_review_page';
 import './App.css';
 
 function App() {
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    const shouldUseDark = savedTheme === 'dark';
+    document.documentElement.classList.toggle('dark', shouldUseDark);
+  }, []);
+
   return (
     <Router>
-      <div className="App">
+      <div className="App min-h-screen bg-white dark:bg-[#0b1f43]">
         <Routes>
           <Route path="/" element={<AdminPortalHome />} />
           <Route path="/login" element={<AdminLogin />} />
