@@ -22,10 +22,15 @@ const AdminCreatePage = () => {
       setMessage(
         `Admin created successfully using ${result.source === 'backend' ? 'backend API' : 'local demo storage'}.`
       );
+      window.alert('Admin created successfully.');
+      return true;
     } catch (err) {
       setCreatedAdmin(null);
       setEmailSent(false);
-      setError(err.response?.data?.message || 'Failed to create admin');
+      const errorMessage = err.response?.data?.message || 'Failed to create admin';
+      setError(errorMessage);
+      window.alert(errorMessage);
+      return false;
     } finally {
       setSaving(false);
     }

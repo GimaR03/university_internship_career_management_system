@@ -3,15 +3,19 @@ const {
   createCompany,
   createInternship,
   createPayment,
+  createStudent,
   deleteCompany,
   deleteInternship,
   deletePayment,
+  deleteStudent,
   getCompanies,
   getInternships,
   getPayments,
+  getStudents,
   updateCompany,
   updateInternship,
   updatePayment,
+  updateStudent,
 } = require('../controllers/adminResourceController');
 const { allowAdminRoles, protectAdmin } = require('../middleware/adminAuthMiddleware');
 
@@ -24,6 +28,14 @@ router.route('/companies')
 router.route('/companies/:id')
   .put(protectAdmin, allowAdminRoles('Super Admin', 'Company Manager'), updateCompany)
   .delete(protectAdmin, allowAdminRoles('Super Admin', 'Company Manager'), deleteCompany);
+
+router.route('/students')
+  .get(protectAdmin, allowAdminRoles('Super Admin', 'Student Manager'), getStudents)
+  .post(protectAdmin, allowAdminRoles('Super Admin', 'Student Manager'), createStudent);
+
+router.route('/students/:id')
+  .put(protectAdmin, allowAdminRoles('Super Admin', 'Student Manager'), updateStudent)
+  .delete(protectAdmin, allowAdminRoles('Super Admin', 'Student Manager'), deleteStudent);
 
 router.route('/internships')
   .get(protectAdmin, allowAdminRoles('Super Admin', 'Internship Manager'), getInternships)

@@ -10,21 +10,81 @@ const initialForm = {
   status: 'Active',
 };
 
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const AdminCreateForm = ({ onCreate, saving }) => {
   const [formData, setFormData] = useState(initialForm);
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+
     setFormData((current) => ({
       ...current,
       [name]: value,
     }));
+
+    setFieldErrors((current) => ({
+      ...current,
+      [name]: '',
+    }));
+  };
+
+  const validateForm = () => {
+    const nextErrors = {};
+
+    if (!formData.fullName.trim()) {
+      nextErrors.fullName = 'Full name is required.';
+    } else if (formData.fullName.trim().length < 3) {
+      nextErrors.fullName = 'Full name must be at least 3 characters.';
+    }
+
+    if (!formData.email.trim()) {
+      nextErrors.email = 'Email address is required.';
+    } else if (!emailPattern.test(formData.email.trim())) {
+      nextErrors.email = 'Enter a valid email address.';
+    }
+
+    if (!formData.role.trim()) {
+      nextErrors.role = 'Role is required.';
+    }
+
+    if (!formData.password.trim()) {
+      nextErrors.password = 'Password is required.';
+    } else if (formData.password.trim().length < 8) {
+      nextErrors.password = 'Password must be at least 8 characters.';
+    }
+
+    if (!formData.status.trim()) {
+      nextErrors.status = 'Status is required.';
+    }
+
+    setFieldErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    await onCreate(formData);
+
+    if (!validateForm()) {
+      window.alert('Please fix the highlighted admin form fields before submitting.');
+      return;
+    }
+
+    const didCreate = await onCreate({
+      ...formData,
+      fullName: formData.fullName.trim(),
+      email: formData.email.trim().toLowerCase(),
+      password: formData.password.trim(),
+      department: initialForm.department,
+    });
+
+    if (!didCreate) {
+      return;
+    }
+
     setFormData(initialForm);
+    setFieldErrors({});
   };
 
   return (
@@ -41,7 +101,7 @@ const AdminCreateForm = ({ onCreate, saving }) => {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="grid gap-5 p-6 md:grid-cols-2">
+      <form noValidate onSubmit={handleSubmit} className="grid gap-5 p-6 md:grid-cols-2">
         <label className="block">
           <span className="mb-2 block text-sm font-medium text-slate-700">Full name</span>
           <input
@@ -50,9 +110,13 @@ const AdminCreateForm = ({ onCreate, saving }) => {
             value={formData.fullName}
             onChange={handleChange}
             required
+            aria-invalid={Boolean(fieldErrors.fullName)}
             className="w-full rounded-2xl border border-indigo-100 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
             placeholder="Enter admin name"
           />
+          {fieldErrors.fullName && (
+            <p className="mt-2 text-sm text-rose-600">{fieldErrors.fullName}</p>
+          )}
         </label>
 
         <label className="block">
@@ -63,9 +127,13 @@ const AdminCreateForm = ({ onCreate, saving }) => {
             value={formData.email}
             onChange={handleChange}
             required
+            aria-invalid={Boolean(fieldErrors.email)}
             className="w-full rounded-2xl border border-indigo-100 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
             placeholder="admin@stepin.edu"
           />
+          {fieldErrors.email && (
+            <p className="mt-2 text-sm text-rose-600">{fieldErrors.email}</p>
+          )}
         </label>
 
         <label className="block">
@@ -74,6 +142,7 @@ const AdminCreateForm = ({ onCreate, saving }) => {
             name="role"
             value={formData.role}
             onChange={handleChange}
+            aria-invalid={Boolean(fieldErrors.role)}
             className="w-full rounded-2xl border border-indigo-100 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
           >
             {ADMIN_ROLES.map((role) => (
@@ -82,19 +151,27 @@ const AdminCreateForm = ({ onCreate, saving }) => {
               </option>
             ))}
           </select>
+          {fieldErrors.role && (
+            <p className="mt-2 text-sm text-rose-600">{fieldErrors.role}</p>
+          )}
         </label>
 
         <label className="block">
           <span className="mb-2 block text-sm font-medium text-slate-700">Password</span>
           <input
-            type="text"
+            type="password"
             name="password"
             value={formData.password}
             onChange={handleChange}
             required
+            minLength={8}
+            aria-invalid={Boolean(fieldErrors.password)}
             className="w-full rounded-2xl border border-indigo-100 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
             placeholder="Create a password"
           />
+          {fieldErrors.password && (
+            <p className="mt-2 text-sm text-rose-600">{fieldErrors.password}</p>
+          )}
         </label>
 
         <label className="block">
@@ -103,9 +180,9 @@ const AdminCreateForm = ({ onCreate, saving }) => {
             type="text"
             name="department"
             value={formData.department}
-            onChange={handleChange}
-            className="w-full rounded-2xl border border-indigo-100 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-            placeholder="Review Analytics"
+            readOnly
+            disabled
+            className="w-full cursor-not-allowed rounded-2xl border border-slate-200 bg-slate-100 px-4 py-3 text-slate-500 outline-none"
           />
         </label>
 
@@ -115,11 +192,15 @@ const AdminCreateForm = ({ onCreate, saving }) => {
             name="status"
             value={formData.status}
             onChange={handleChange}
+            aria-invalid={Boolean(fieldErrors.status)}
             className="w-full rounded-2xl border border-indigo-100 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
           >
             <option value="Active">Active</option>
             <option value="Inactive">Inactive</option>
           </select>
+          {fieldErrors.status && (
+            <p className="mt-2 text-sm text-rose-600">{fieldErrors.status}</p>
+          )}
         </label>
 
         <div className="flex items-end">

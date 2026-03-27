@@ -185,6 +185,7 @@ const AdminDashboard = () => {
                   {item.label === 'Create Admin' && '+'}
                   {item.label === 'Admin Registry' && '≣'}
                   {item.label === 'Company Data' && '▣'}
+                  {item.label === 'Student Data' && '◫'}
                   {item.label === 'Internship Data' && '◆'}
                   {item.label === 'Payment Data' && '¤'}
                   {item.label === 'Review Data' && '✦'}
