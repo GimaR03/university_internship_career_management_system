@@ -96,12 +96,12 @@ const C_CompanyReviews = () => {
         title: formData.title,
         comment: enrichedComment
       };
-      
+
       const result = await submitCompanyReview(submissionData);
       setReviews((current) => [result.data, ...current]);
       setFormData(initialForm);
       setMessage('Your review was submitted. Our team will review and reply shortly.');
-      
+
       // Auto switch to history after submission for better UX
       setTimeout(() => setActivePage('history'), 2000);
     } catch (err) {
@@ -133,7 +133,7 @@ const C_CompanyReviews = () => {
       <div className="relative overflow-hidden rounded-[2.5rem] bg-indigo-900 p-8 text-white shadow-2xl shadow-indigo-200">
         <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-violet-600/30 blur-3xl" />
         <div className="absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-blue-600/20 blur-3xl" />
-        
+
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <h1 className="text-4xl font-black tracking-tight text-white">Review Center</h1>
@@ -141,7 +141,7 @@ const C_CompanyReviews = () => {
               Manage your feedback, track admin responses, and monitor payment records in one place.
             </p>
           </div>
-          
+
           <div className="flex flex-wrap gap-2 rounded-2xl bg-white/10 p-1.5 backdrop-blur-sm">
             {[
               { id: 'submit', label: 'Leave Review', icon: FiMessageSquare },
@@ -151,11 +151,10 @@ const C_CompanyReviews = () => {
               <button
                 key={tab.id}
                 onClick={() => setActivePage(tab.id)}
-                className={`flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold transition-all duration-300 ${
-                  activePage === tab.id
+                className={`flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold transition-all duration-300 ${activePage === tab.id
                     ? 'bg-white text-indigo-900 shadow-lg'
                     : 'text-white hover:bg-white/10'
-                }`}
+                  }`}
               >
                 <tab.icon className={activePage === tab.id ? 'text-indigo-600' : ''} />
                 {tab.label}
@@ -270,11 +269,10 @@ const C_CompanyReviews = () => {
                           key={option}
                           type="button"
                           onClick={() => setFormData(prev => ({ ...prev, recommendation: option }))}
-                          className={`flex-1 rounded-xl py-3 text-sm font-bold border-2 transition-all ${
-                            formData.recommendation === option 
-                              ? 'border-indigo-600 bg-indigo-50 text-indigo-600' 
+                          className={`flex-1 rounded-xl py-3 text-sm font-bold border-2 transition-all ${formData.recommendation === option
+                              ? 'border-indigo-600 bg-indigo-50 text-indigo-600'
                               : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-slate-200'
-                          }`}
+                            }`}
                         >
                           {option}
                         </button>
@@ -314,7 +312,7 @@ const C_CompanyReviews = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="rounded-[2.5rem] border border-slate-100 bg-white p-8 shadow-sm">
                 <h3 className="font-bold text-slate-900 border-b pb-4 mb-4">Submission Guide</h3>
                 <ul className="space-y-4">
@@ -479,8 +477,8 @@ const C_CompanyReviews = () => {
                         <div className="rounded-2xl bg-white p-4 shadow-sm">
                           <p className="text-[10px] font-black text-slate-400 uppercase">Status</p>
                           <div className="mt-1 flex items-center gap-2">
-                             <div className={`h-2 w-2 rounded-full ${payment.status === 'verified' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
-                             <span className="text-sm font-bold text-indigo-900 capitalize">{payment.status}</span>
+                            <div className={`h-2 w-2 rounded-full ${payment.status === 'verified' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                            <span className="text-sm font-bold text-indigo-900 capitalize">{payment.status}</span>
                           </div>
                         </div>
                       </div>
