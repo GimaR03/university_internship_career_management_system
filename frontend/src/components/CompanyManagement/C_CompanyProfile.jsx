@@ -206,7 +206,7 @@ const C_CompanyProfile = ({ companyData, onUpdate }) => {
                                             </div>
                                             <input
                                                 type="file"
-                                                accept="image/jpeg,image/jpg"
+                                                accept="image/jpeg,image/jpg,image/png,image/webp"
                                                 onChange={handleLogoUpload}
                                                 className="hidden"
                                                 disabled={uploadingLogo}
@@ -218,7 +218,7 @@ const C_CompanyProfile = ({ companyData, onUpdate }) => {
                                 {isEditing && (
                                     <div>
                                         <p className="text-sm text-gray-500 dark:text-slate-400">Upload Company Logo</p>
-                                        <p className="text-xs text-gray-400">JPEG or JPG only • Max 5MB recommended</p>
+                                        <p className="text-xs text-gray-400">PNG, JPG, SVG, and WebP are supported • Max 5MB recommended</p>
                                         {uploadingLogo && <p className="text-indigo-600 text-sm mt-2">Uploading logo...</p>}
                                     </div>
                                 )}
@@ -226,62 +226,137 @@ const C_CompanyProfile = ({ companyData, onUpdate }) => {
 
                             {/* Company Information */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                {[
-                                    { label: "Company Name", name: "companyName", type: "text" },
-                                    { label: "Email", name: "email", type: "email" },
-                                    { label: "Phone", name: "phone", type: "tel" },
-                                    { label: "Industry", name: "industry", type: "text" },
-                                    { label: "Company Size", name: "companySize", type: "select" },
-                                    { label: "Website", name: "website", type: "url" },
-                                ].map((field) => (
-                                    <div key={field.name}>
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-400 mb-2">
-                                            {field.label}
-                                        </label>
-                                        {isEditing ? (
-                                            field.type === "select" ? (
-                                                <select
-                                                    name={field.name}
-                                                    value={formData[field.name] || ''}
-                                                    onChange={handleChange}
-                                                    className="w-full px-5 py-3 border border-gray-300 dark:border-slate-700 rounded-2xl bg-white dark:bg-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                                                >
-                                                    <option value="1-10">1-10 employees</option>
-                                                    <option value="11-50">11-50 employees</option>
-                                                    <option value="51-200">51-200 employees</option>
-                                                    <option value="201-500">201-500 employees</option>
-                                                    <option value="500+">500+ employees</option>
-                                                </select>
-                                            ) : (
-                                                <input
-                                                    type={field.type}
-                                                    name={field.name}
-                                                    value={formData[field.name] || ''}
-                                                    onChange={handleChange}
-                                                    className="w-full px-5 py-3 border border-gray-300 dark:border-slate-700 rounded-2xl bg-white dark:bg-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                                                />
-                                            )
-                                        ) : (
-                                            <p className="text-lg text-gray-900 dark:text-white py-3">
-                                                {field.name === 'website' && formData.website ? (
-                                                    <a href={formData.website} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">
-                                                        {formData.website}
-                                                    </a>
-                                                ) : field.name === 'companySize' ? (
-                                                    `${formData.companySize} employees`
-                                                ) : (
-                                                    formData[field.name] || '—'
-                                                )}
-                                            </p>
-                                        )}
-                                    </div>
-                                ))}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-400 mb-2">
+                                        Company Name
+                                    </label>
+                                    {isEditing ? (
+                                        <input
+                                            type="text"
+                                            name="companyName"
+                                            value={formData.companyName || ''}
+                                            onChange={handleChange}
+                                            className="w-full px-5 py-3 border border-gray-300 dark:border-slate-700 rounded-2xl bg-white dark:bg-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                        />
+                                    ) : (
+                                        <p className="text-lg text-gray-900 dark:text-white py-3">
+                                            {formData.companyName || '—'}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-400 mb-2">
+                                        Email
+                                    </label>
+                                    {isEditing ? (
+                                        <input
+                                            type="email"
+                                            name="email"
+                                            value={formData.email || ''}
+                                            onChange={handleChange}
+                                            className="w-full px-5 py-3 border border-gray-300 dark:border-slate-700 rounded-2xl bg-white dark:bg-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                        />
+                                    ) : (
+                                        <p className="text-lg text-gray-900 dark:text-white py-3">
+                                            {formData.email || '—'}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-400 mb-2">
+                                        Phone
+                                    </label>
+                                    {isEditing ? (
+                                        <input
+                                            type="tel"
+                                            name="phone"
+                                            value={formData.phone || ''}
+                                            onChange={handleChange}
+                                            className="w-full px-5 py-3 border border-gray-300 dark:border-slate-700 rounded-2xl bg-white dark:bg-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                        />
+                                    ) : (
+                                        <p className="text-lg text-gray-900 dark:text-white py-3">
+                                            {formData.phone || '—'}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-400 mb-2">
+                                        Industry
+                                    </label>
+                                    {isEditing ? (
+                                        <input
+                                            type="text"
+                                            name="industry"
+                                            value={formData.industry || ''}
+                                            onChange={handleChange}
+                                            className="w-full px-5 py-3 border border-gray-300 dark:border-slate-700 rounded-2xl bg-white dark:bg-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                        />
+                                    ) : (
+                                        <p className="text-lg text-gray-900 dark:text-white py-3">
+                                            {formData.industry || '—'}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-400 mb-2">
+                                        Company Size
+                                    </label>
+                                    {isEditing ? (
+                                        <select
+                                            name="companySize"
+                                            value={formData.companySize || ''}
+                                            onChange={handleChange}
+                                            className="w-full px-5 py-3 border border-gray-300 dark:border-slate-700 rounded-2xl bg-white dark:bg-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                        >
+                                            <option value="">Select size</option>
+                                            <option value="1-10">1-10 employees</option>
+                                            <option value="11-50">11-50 employees</option>
+                                            <option value="51-200">51-200 employees</option>
+                                            <option value="201-500">201-500 employees</option>
+                                            <option value="500+">500+ employees</option>
+                                        </select>
+                                    ) : (
+                                        <p className="text-lg text-gray-900 dark:text-white py-3">
+                                            {formData.companySize ? `${formData.companySize} employees` : '—'}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-400 mb-2">
+                                        Website
+                                    </label>
+                                    {isEditing ? (
+                                        <input
+                                            type="url"
+                                            name="website"
+                                            value={formData.website || ''}
+                                            onChange={handleChange}
+                                            className="w-full px-5 py-3 border border-gray-300 dark:border-slate-700 rounded-2xl bg-white dark:bg-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                        />
+                                    ) : (
+                                        <p className="text-lg text-gray-900 dark:text-white py-3">
+                                            {formData.website ? (
+                                                <a href={formData.website} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">
+                                                    {formData.website}
+                                                </a>
+                                            ) : '—'}
+                                        </p>
+                                    )}
+                                </div>
                             </div>
 
                             {/* Address & Description */}
                             <div className="space-y-8">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-400 mb-2">Address</label>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-400 mb-2">
+                                        Address
+                                    </label>
                                     {isEditing ? (
                                         <textarea
                                             name="address"
@@ -291,12 +366,16 @@ const C_CompanyProfile = ({ companyData, onUpdate }) => {
                                             className="w-full px-5 py-4 border border-gray-300 dark:border-slate-700 rounded-3xl bg-white dark:bg-slate-800 focus:ring-2 focus:ring-indigo-500 resize-y"
                                         />
                                     ) : (
-                                        <p className="text-gray-700 dark:text-slate-300 leading-relaxed">{formData.address || '—'}</p>
+                                        <p className="text-gray-700 dark:text-slate-300 leading-relaxed">
+                                            {formData.address || '—'}
+                                        </p>
                                     )}
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-400 mb-2">Company Description</label>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-400 mb-2">
+                                        Company Description
+                                    </label>
                                     {isEditing ? (
                                         <textarea
                                             name="description"
@@ -313,26 +392,32 @@ const C_CompanyProfile = ({ companyData, onUpdate }) => {
                                 </div>
                             </div>
 
-<<<<<<< HEAD
-                            {/* Action Buttons */}
+                            {/* Pro Status Message */}
+                            {proStatus?.status === 'active' && (
+                                <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-700">
+                                    Successfully added Pro Account. Congratulations!
+                                </div>
+                            )}
+
+                            {/* Form Actions */}
                             {isEditing && (
-                                <div className="flex gap-4 pt-6 border-t dark:border-slate-800">
+                                <div className="flex space-x-3 pt-4">
                                     <button
                                         type="submit"
                                         disabled={loading}
-                                        className="flex-1 md:flex-none px-10 py-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-semibold rounded-2xl transition-all shadow-lg"
+                                        className="px-6 py-3 bg-indigo-600 text-white rounded-2xl hover:bg-indigo-700 disabled:opacity-50 transition-all font-medium"
                                     >
-                                        {loading ? 'Saving Changes...' : 'Save Changes'}
+                                        {loading ? 'Saving...' : 'Save Changes'}
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => {
                                             setIsEditing(false);
-                                            setFormData(companyData || {});
+                                            setFormData(companyData);
                                             setError('');
                                             setSuccess('');
                                         }}
-                                        className="flex-1 md:flex-none px-10 py-4 bg-gray-200 dark:bg-slate-700 hover:bg-gray-300 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-200 font-semibold rounded-2xl transition-all"
+                                        className="px-6 py-3 bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-slate-200 rounded-2xl hover:bg-gray-300 dark:hover:bg-slate-600 transition-all font-medium"
                                     >
                                         Cancel
                                     </button>
@@ -340,207 +425,6 @@ const C_CompanyProfile = ({ companyData, onUpdate }) => {
                             )}
                         </div>
                     </form>
-=======
-                    {proStatus?.status === 'active' && (
-                        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-700">
-                            Successfully added Pro Account. Congratulations!
-                        </div>
-                    )}
-
-                    {/* Logo Section */}
-                    <div className="flex items-center space-x-6">
-                        <div className="w-24 h-24 overflow-hidden bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full flex items-center justify-center text-white text-3xl font-bold ring-4 ring-white dark:ring-slate-800 shadow-lg">
-                            {formData.logo ? (
-                                <img src={formData.logo} alt="Logo" className="w-full h-full rounded-full object-cover" />
-                            ) : (
-                                formData.companyName?.charAt(0)
-                            )}
-                        </div>
-                        {isEditing && (
-                            <div>
-                                <label className="cursor-pointer px-4 py-2 bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-slate-100 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-600">
-                                    <span>Upload Logo</span>
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleLogoUpload}
-                                        className="hidden"
-                                        disabled={uploadingLogo}
-                                    />
-                                </label>
-                                <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">PNG, JPG, SVG, and WebP are supported.</p>
-                                {uploadingLogo && <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Uploading...</p>}
-                            </div>
-                        )}
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
-                                Company Name
-                            </label>
-                            {isEditing ? (
-                                <input
-                                    type="text"
-                                    name="companyName"
-                                    value={formData.companyName || ''}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500"
-                                />
-                            ) : (
-                                <p className="text-gray-900 dark:text-slate-100">{formData.companyName}</p>
-                            )}
-                        </div>
-                        
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
-                                Email
-                            </label>
-                            {isEditing ? (
-                                <input
-                                    type="email"
-                                    name="email"
-                                    value={formData.email || ''}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500"
-                                />
-                            ) : (
-                                <p className="text-gray-900 dark:text-slate-100">{formData.email}</p>
-                            )}
-                        </div>
-                        
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
-                                Phone
-                            </label>
-                            {isEditing ? (
-                                <input
-                                    type="tel"
-                                    name="phone"
-                                    value={formData.phone || ''}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500"
-                                />
-                            ) : (
-                                <p className="text-gray-900 dark:text-slate-100">{formData.phone}</p>
-                            )}
-                        </div>
-                        
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
-                                Industry
-                            </label>
-                            {isEditing ? (
-                                <input
-                                    type="text"
-                                    name="industry"
-                                    value={formData.industry || ''}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500"
-                                />
-                            ) : (
-                                <p className="text-gray-900 dark:text-slate-100">{formData.industry}</p>
-                            )}
-                        </div>
-                        
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
-                                Company Size
-                            </label>
-                            {isEditing ? (
-                                <select
-                                    name="companySize"
-                                    value={formData.companySize || ''}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500"
-                                >
-                                    <option value="1-10">1-10 employees</option>
-                                    <option value="11-50">11-50 employees</option>
-                                    <option value="51-200">51-200 employees</option>
-                                    <option value="201-500">201-500 employees</option>
-                                    <option value="500+">500+ employees</option>
-                                </select>
-                            ) : (
-                                <p className="text-gray-900 dark:text-slate-100">{formData.companySize} employees</p>
-                            )}
-                        </div>
-                        
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
-                                Website
-                            </label>
-                            {isEditing ? (
-                                <input
-                                    type="url"
-                                    name="website"
-                                    value={formData.website || ''}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500"
-                                />
-                            ) : (
-                                <a href={formData.website} target="_blank" rel="noopener noreferrer" className="text-indigo-600 dark:text-indigo-400 hover:underline">
-                                    {formData.website}
-                                </a>
-                            )}
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
-                            Address
-                        </label>
-                        {isEditing ? (
-                            <textarea
-                                name="address"
-                                value={formData.address || ''}
-                                onChange={handleChange}
-                                rows="3"
-                                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500"
-                            ></textarea>
-                        ) : (
-                            <p className="text-gray-900 dark:text-slate-100">{formData.address}</p>
-                        )}
-                    </div>
-                    
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
-                            Company Description
-                        </label>
-                        {isEditing ? (
-                            <textarea
-                                name="description"
-                                value={formData.description || ''}
-                                onChange={handleChange}
-                                rows="5"
-                                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500"
-                            ></textarea>
-                        ) : (
-                            <p className="text-gray-900 dark:text-slate-100 whitespace-pre-wrap">{formData.description}</p>
-                        )}
-                    </div>
-                    
-                    {isEditing && (
-                        <div className="flex space-x-3">
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
-                            >
-                                {loading ? 'Saving...' : 'Save Changes'}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setIsEditing(false);
-                                    setFormData(companyData);
-                                }}
-                                className="px-6 py-2 bg-gray-300 dark:bg-slate-600 text-gray-700 dark:text-slate-100 rounded-lg hover:bg-gray-400 dark:hover:bg-slate-500"
-                            >
-                                Cancel
-                            </button>
-                        </div>
-                    )}
->>>>>>> CompanyManagemet_2
                 </div>
             </div>
         </div>
