@@ -1,6 +1,11 @@
 import React, { useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
+const BANK_ACCOUNT_NUMBERS = {
+  "Sampath Bank": "003990000033",
+  "BOC Bank": "88069083"
+};
+
 const P_PaymentUpload = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
@@ -50,6 +55,19 @@ const P_PaymentUpload = () => {
     }
 
     if (name === "amount" && fixedAmount) {
+      return;
+    }
+
+    if (name === "bankName") {
+      setFormData({
+        ...formData,
+        bankName: value,
+        accountNumber: BANK_ACCOUNT_NUMBERS[value] || ""
+      });
+
+      if (errors.bankName || errors.accountNumber) {
+        setErrors({ ...errors, bankName: "", accountNumber: "" });
+      }
       return;
     }
 
@@ -162,7 +180,7 @@ const P_PaymentUpload = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Account Number</label>
-              <input name="accountNumber" placeholder="Account Number" required value={formData.accountNumber} onChange={handleChange} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent" />
+              <input name="accountNumber" placeholder="Account Number" required value={formData.accountNumber} readOnly className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent" />
             </div>
 
             <div>
