@@ -8,6 +8,8 @@ import {
 } from './admin_utils';
 import { downloadFilteredPdfReport } from './admin_pdf_utils';
 
+const IconUser = () => <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>;
+
 // Inline SVG Icons
 const IconMessage = () => <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>;
 const IconPie = () => <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>;
@@ -43,6 +45,7 @@ const AdminReviewPage = () => {
   const [message, setMessage] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
+  const [typeFilter, setTypeFilter] = useState('All'); // 'All' | 'Company' | 'Student'
   const [editingReviewId, setEditingReviewId] = useState(null);
   const [replyForm, setReplyForm] = useState(initialReplyState);
 
@@ -104,15 +107,18 @@ const AdminReviewPage = () => {
     });
     const topCategory = Object.entries(categories).sort((a,b) => b[1] - a[1])[0]?.[0] || 'Unidentified';
 
+    const companyCount = filteredReviews.filter(r => r.reviewerType === 'Company').length;
+    const studentCount = filteredReviews.filter(r => r.reviewerType === 'Student').length;
+
     setAiAnalysis({
       sentiment,
       avgRating: avgRating.toFixed(1),
       topCategory,
-      insight: `The system has detected a ${sentiment.toLowerCase()} trend. Management should prioritize feedback in the '${topCategory}' sector, as it is the most frequent feedback domain in the current dataset.`,
+      insight: `The system has detected a ${sentiment.toLowerCase()} trend across ${companyCount} company and ${studentCount} student reviews. Management should prioritize feedback in the '${topCategory}' sector, which dominates the current feedback landscape.`,
       recommendations: [
-        `Scale resources in high-performance areas like ${topCategory}.`,
-        "Address pending responses to improve the current engagement rate.",
-        "Automate recurring feedback patterns to streamline the pipeline."
+        `Optimize resources in '${topCategory}' based on high engagement.`,
+        "Balance student vs company expectations in the next system sprint.",
+        "Address pending student queries to maintain platform trust."
       ]
     });
     setShowAiModal(true);
@@ -138,12 +144,13 @@ const AdminReviewPage = () => {
     });
 
     downloadFilteredPdfReport({
-      fileName: `Review_Analysis_${new Date().toLocaleDateString()}.pdf`,
-      title: "Consolidated Feedback Analysis Report",
+      fileName: `Unified_Review_Report_${new Date().toLocaleDateString()}.pdf`,
+      title: "Consolidated Student & Company Feedback Analysis",
       subtitle: `System-generated export for ${filteredReviews.length} records.`,
-      filters: { Status: statusFilter, Search: searchTerm },
+      filters: { Status: statusFilter, Source: typeFilter, Search: searchTerm },
       columns: [
-        { key: 'companyName', label: 'Company' },
+        { key: 'reviewerType', label: 'Source' },
+        { key: 'name', label: 'Reviewer' },
         { key: 'title', label: 'Feedback Title' },
         { key: 'rating', label: 'Score' },
         { key: 'category', label: 'Domain' },
@@ -151,7 +158,19 @@ const AdminReviewPage = () => {
         { key: 'comment', label: 'Core Feedback' },
         { key: 'status', label: 'Pipeline Status' }
       ],
-      rows
+      rows: filteredReviews.map(r => {
+        const { cleanComment, details } = parseReviewDetails(r.comment);
+        return {
+          reviewerType: r.reviewerType || 'Company',
+          name: r.reviewerType === 'Student' ? r.studentName : r.companyName,
+          title: r.title,
+          comment: cleanComment,
+          rating: `${r.rating}/5`,
+          status: r.status,
+          category: details?.Category || 'N/A',
+          performance: details?.['System Performance'] || 'N/A'
+        };
+      })
     });
     setMessage("PDF Report successfully generated.");
   };
@@ -167,9 +186,10 @@ const AdminReviewPage = () => {
             .includes(searchTerm.toLowerCase());
 
         const matchesStatus = statusFilter === 'All' || review.status === statusFilter;
-        return matchesSearch && matchesStatus;
+        const matchesType = typeFilter === 'All' || review.reviewerType === typeFilter;
+        return matchesSearch && matchesStatus && matchesType;
       }),
-    [reviews, searchTerm, statusFilter]
+    [reviews, searchTerm, statusFilter, typeFilter]
   );
 
   const groupedByCompany = useMemo(() => {
@@ -303,6 +323,21 @@ const AdminReviewPage = () => {
             </p>
           </div>
 
+          <div className="group relative overflow-hidden rounded-[2rem] bg-white p-8 shadow-sm transition-all hover:shadow-xl hover:shadow-emerald-50 border border-slate-100">
+             <div className="absolute top-0 right-0 p-4 opacity-5 translate-x-2 -translate-y-2">
+              <IconChart className="text-8xl" />
+            </div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 mb-6">
+              <IconChart className="text-2xl" />
+            </div>
+            <p className="text-xs font-black uppercase tracking-widest text-slate-400">Platform Split</p>
+            <div className="mt-2 flex items-baseline gap-2">
+              <span className="text-2xl font-black text-indigo-900">{reviews.filter(r => r.reviewerType === 'Company').length}C</span>
+              <span className="text-slate-300">/</span>
+              <span className="text-2xl font-black text-emerald-600">{reviews.filter(r => r.reviewerType === 'Student').length}S</span>
+            </div>
+          </div>
+
           <div className="group relative overflow-hidden rounded-[2rem] bg-indigo-900 p-8 text-white shadow-xl shadow-indigo-100">
             <div className="absolute -right-10 -bottom-10 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 mb-6">
@@ -366,6 +401,28 @@ const AdminReviewPage = () => {
                   }`}
                 >
                   {filter}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-400">
+               <IconUser />
+               Source
+            </div>
+            <div className="flex rounded-[1.5rem] bg-slate-50 p-1">
+              {['All', 'Company', 'Student'].map(type => (
+                <button
+                  key={type}
+                  onClick={() => setTypeFilter(type)}
+                  className={`rounded-[1.25rem] px-5 py-2.5 text-xs font-black uppercase tracking-tighter transition-all ${
+                    typeFilter === type
+                      ? 'bg-emerald-600 text-white shadow-md shadow-emerald-100'
+                      : 'text-slate-500 hover:text-indigo-600'
+                  }`}
+                >
+                  {type}
                 </button>
               ))}
             </div>
@@ -566,10 +623,14 @@ const AdminReviewPage = () => {
                           <IconStar className="fill-amber-400" />
                           {review.rating}.0 Quality Score
                         </div>
+                        <span className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[10px] font-black uppercase tracking-widest ${review.reviewerType === 'Student' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-indigo-100 text-indigo-700 border-indigo-200'} border`}>
+                          {review.reviewerType === 'Student' ? <IconUser /> : <IconBuilding />}
+                          {review.reviewerType || 'Company'} Feedback
+                        </span>
                       </div>
 
                       <div className="flex items-center gap-4 text-xs font-bold text-slate-400">
-                        <span className="text-indigo-600 hover:underline cursor-pointer">{review.companyName}</span>
+                        <span className="text-indigo-600 hover:underline cursor-pointer">{review.reviewerType === 'Student' ? review.studentName : review.companyName}</span>
                         <span>•</span>
                         <span>{new Date(review.createdAt).toLocaleString(undefined, { dateStyle: 'long', timeStyle: 'short' })}</span>
                       </div>

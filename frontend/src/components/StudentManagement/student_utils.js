@@ -42,6 +42,12 @@ export const loginStudent = async (email, password) => {
   }
 };
 
+export const saveStudentSession = (token, student) => {
+    const session = { token, student };
+    localStorage.setItem(STUDENT_SESSION_KEY, JSON.stringify(session));
+    return session;
+};
+
 export const getStudentSession = () => {
   const session = localStorage.getItem(STUDENT_SESSION_KEY);
   return session ? JSON.parse(session) : null;
@@ -50,5 +56,36 @@ export const getStudentSession = () => {
 export const isStudentLoggedIn = () => Boolean(getStudentSession()?.token);
 
 export const logoutStudent = () => {
-  localStorage.removeItem(STUDENT_SESSION_KEY);
+    localStorage.removeItem(STUDENT_SESSION_KEY);
+    // Also clear legacy keys for clean state
+    localStorage.removeItem('token');
+    localStorage.removeItem('student');
+    localStorage.removeItem('studentAccount');
+};
+
+// --- Review API Section ---
+
+const getAuthHeader = () => {
+    const session = getStudentSession();
+    return {
+        headers: { Authorization: `Bearer ${session?.token || ''}` }
+    };
+};
+
+export const submitStudentReview = async (reviewData) => {
+    try {
+        const response = await axios.post('http://localhost:5000/api/reviews/student', reviewData, getAuthHeader());
+        return response.data;
+    } catch (error) {
+        throw normalizeStudentError(error, 'Failed to submit review');
+    }
+};
+
+export const getStudentReviews = async () => {
+    try {
+        const response = await axios.get('http://localhost:5000/api/reviews/student', getAuthHeader());
+        return response.data;
+    } catch (error) {
+        throw normalizeStudentError(error, 'Failed to fetch reviews');
+    }
 };
