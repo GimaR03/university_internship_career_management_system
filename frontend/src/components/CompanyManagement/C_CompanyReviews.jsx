@@ -130,14 +130,14 @@ const C_CompanyReviews = () => {
       </div>
 
       {/* Navigation Header */}
-      <div className="relative overflow-hidden rounded-[2.5rem] bg-indigo-900 p-8 text-white shadow-2xl shadow-indigo-200">
-        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-violet-600/30 blur-3xl" />
-        <div className="absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-blue-600/20 blur-3xl" />
+      <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-r from-indigo-700 via-blue-700 to-purple-700 p-8 text-white shadow-2xl shadow-indigo-200">
+        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-purple-500/35 blur-3xl" />
+        <div className="absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-blue-500/30 blur-3xl" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <h1 className="text-4xl font-black tracking-tight text-white">Review Center</h1>
-            <p className="mt-2 text-indigo-200 max-w-md">
+            <p className="mt-2 text-blue-100 max-w-md">
               Manage your feedback, track admin responses, and monitor payment records in one place.
             </p>
           </div>

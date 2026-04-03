@@ -203,8 +203,8 @@ const C_StudentRecommendations = ({ internships }) => {
                 </p>
 
                 {!isProActive ? (
-                    <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
-                        <p className="text-amber-800 text-sm">
+                    <div className="rounded-lg border border-indigo-200 bg-gradient-to-r from-indigo-50 to-purple-50 p-4">
+                        <p className="text-indigo-900 text-sm leading-6">
                             This feature is available only for Pro accounts. Upgrade to Pro to unlock unlimited direct search.
                         </p>
                         <button
@@ -214,7 +214,7 @@ const C_StudentRecommendations = ({ internships }) => {
                                     companyName: localStorage.getItem('companyName') || ''
                                 }
                             })}
-                            className="mt-3 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700"
+                            className="mt-3 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-md"
                         >
                             Upgrade to Pro
                         </button>
