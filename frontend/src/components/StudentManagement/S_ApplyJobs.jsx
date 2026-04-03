@@ -10,7 +10,11 @@ import {
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { resolveUploadUrl } from "./uploadUrl";
-import { getStudentSession as getStoredStudentSession, logoutStudent } from "./student_utils";
+import {
+  getStudentSession as getStoredStudentSession,
+  isStudentAuthError,
+  logoutStudent,
+} from "./student_utils";
 
 const INTERNSHIPS_API_URL = "http://localhost:5000/api/internships";
 const APPLICATIONS_API_URL = "http://localhost:5000/api/applications";
@@ -143,6 +147,13 @@ function S_ApplyJobs() {
           items.map((item) => item.internshipId?._id).filter(Boolean)
         );
       } catch (err) {
+        if (isStudentAuthError(err)) {
+          logoutStudent();
+          setNotice("Your student session expired. Please log in again.");
+          navigate("/login/student");
+          return;
+        }
+
         console.error("Failed to load applications", err);
       }
     };
@@ -179,13 +190,14 @@ function S_ApplyJobs() {
         current.includes(internshipId) ? current : [...current, internshipId]
       );
     } catch (err) {
-      const message = err.response?.data?.message || "Failed to apply for internship";
-      setNotice(message);
-
-      if (message.toLowerCase().includes("token failed") || err.response?.status === 401) {
+      if (isStudentAuthError(err)) {
         logoutStudent();
+        setNotice("Your student session expired. Please log in again.");
         navigate("/login/student");
+        return;
       }
+
+      setNotice(err.response?.data?.message || "Failed to apply for internship");
     } finally {
       setApplyingId("");
     }
