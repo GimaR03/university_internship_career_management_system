@@ -12,7 +12,7 @@ import {
 } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 import { resolveUploadUrl } from "./uploadUrl";
-import { getStudentSession as getStoredStudentSession } from "./student_utils";
+import { getStudentSession as getStoredStudentSession, logoutStudent } from "./student_utils";
 
 const INTERNSHIP_API_URL = "http://localhost:5000/api/internships";
 const APPLICATION_API_URL = "http://localhost:5000/api/applications";
@@ -219,7 +219,13 @@ function S_SearchJobs() {
       );
       setNotice(response.data?.message || "Application submitted successfully");
     } catch (err) {
-      setNotice(err.response?.data?.message || "Failed to apply for internship");
+      const message = err.response?.data?.message || "Failed to apply for internship";
+      setNotice(message);
+
+      if (message.toLowerCase().includes("token failed") || err.response?.status === 401) {
+        logoutStudent();
+        navigate("/login/student");
+      }
     } finally {
       setApplyingId("");
     }

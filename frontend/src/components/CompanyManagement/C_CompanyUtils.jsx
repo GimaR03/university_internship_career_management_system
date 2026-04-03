@@ -62,9 +62,21 @@ const buildMatchScore = (profile, category) => {
     return Math.min(100, (preferredHit ? 60 : 0) + (searchableText.includes(categoryText) ? 20 : 0) + keywordHits * 15);
 };
 
+const normalizeToken = (token) => {
+    if (!token || typeof token !== 'string') return '';
+    const trimmed = token.trim();
+    if (!trimmed || trimmed === 'undefined' || trimmed === 'null') return '';
+    return trimmed;
+};
+
 // Set up axios instance with token
 const getAuthHeader = () => {
-    const token = localStorage.getItem('companyToken');
+    const token = normalizeToken(localStorage.getItem('companyToken'));
+
+    if (!token) {
+        throw { message: 'Company session expired. Please login again.' };
+    }
+
     return {
         headers: { Authorization: `Bearer ${token}` }
     };

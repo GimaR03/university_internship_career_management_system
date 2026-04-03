@@ -6,6 +6,13 @@ const LEGACY_TOKEN_KEY = 'token';
 const LEGACY_ACCOUNT_KEY = 'studentAccount';
 const LEGACY_PROFILE_KEY = 'student';
 
+const normalizeToken = (token) => {
+  if (!token || typeof token !== 'string') return '';
+  const trimmed = token.trim();
+  if (!trimmed || trimmed === 'undefined' || trimmed === 'null') return '';
+  return trimmed;
+};
+
 const normalizeStudentError = (error, fallbackMessage) => {
   const message = error.response?.data?.message || error.response?.data?.error || error.message || fallbackMessage;
 
@@ -50,11 +57,16 @@ export const setStudentSession = (session) => {
     return;
   }
 
-  localStorage.setItem(STUDENT_SESSION_KEY, JSON.stringify(session));
-
-  if (session.token) {
-    localStorage.setItem(LEGACY_TOKEN_KEY, session.token);
+  const safeToken = normalizeToken(session.token);
+  if (!safeToken) {
+    localStorage.removeItem(STUDENT_SESSION_KEY);
+    localStorage.removeItem(LEGACY_TOKEN_KEY);
+    return;
   }
+
+  localStorage.setItem(STUDENT_SESSION_KEY, JSON.stringify({ ...session, token: safeToken }));
+
+  localStorage.setItem(LEGACY_TOKEN_KEY, safeToken);
 
   if (session.student) {
     localStorage.setItem(LEGACY_ACCOUNT_KEY, JSON.stringify(session.student));
@@ -65,13 +77,19 @@ export const getStudentSession = () => {
   const session = localStorage.getItem(STUDENT_SESSION_KEY);
   if (session) {
     try {
-      return JSON.parse(session);
+      const parsed = JSON.parse(session);
+      const safeToken = normalizeToken(parsed?.token);
+      if (!safeToken) {
+        localStorage.removeItem(STUDENT_SESSION_KEY);
+      } else {
+        return { ...parsed, token: safeToken };
+      }
     } catch {
       localStorage.removeItem(STUDENT_SESSION_KEY);
     }
   }
 
-  const token = localStorage.getItem(LEGACY_TOKEN_KEY);
+  const token = normalizeToken(localStorage.getItem(LEGACY_TOKEN_KEY));
   const studentRaw = localStorage.getItem(LEGACY_ACCOUNT_KEY);
 
   if (!token || !studentRaw) {

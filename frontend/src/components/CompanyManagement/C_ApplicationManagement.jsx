@@ -32,10 +32,18 @@ const C_ApplicationManagement = ({ internships }) => {
 
     const handleStatusUpdate = async (applicationId, status) => {
         try {
+            setError('');
             await updateApplicationStatus(applicationId, status);
-            fetchApplications();
+            await fetchApplications();
+
+            setSelectedApplication((current) => {
+                if (!current || current._id !== applicationId) return current;
+                return { ...current, status };
+            });
         } catch (err) {
-            alert('Failed to update application status');
+            const message = err?.message || 'Failed to update application status';
+            setError(message);
+            alert(message);
         }
     };
 

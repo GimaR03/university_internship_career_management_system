@@ -25,8 +25,11 @@ const serializeProfileFile = (value) => {
 };
 
 const buildStudentSnapshot = (studentAccount, studentProfile) => {
-    const firstName = studentProfile?.firstName || studentAccount?.name?.split(' ')[0] || '';
-    const lastName = studentProfile?.lastName || studentAccount?.name?.split(' ').slice(1).join(' ') || '';
+    const accountFirstName = studentAccount?.firstName || studentAccount?.name?.split(' ')[0] || '';
+    const accountLastName = studentAccount?.lastName || studentAccount?.name?.split(' ').slice(1).join(' ') || '';
+
+    const firstName = studentProfile?.firstName || accountFirstName;
+    const lastName = studentProfile?.lastName || accountLastName;
     const fullName = `${firstName} ${lastName}`.trim() || studentAccount?.name || '';
 
     return {
@@ -156,7 +159,7 @@ const applyForInternship = async (req, res) => {
 const getApplicationsByInternship = async (req, res) => {
     try {
         const applications = await Application.find({ internshipId: req.params.internshipId })
-            .populate('studentId', 'name email')
+            .populate('studentId', 'firstName lastName email contactNumber')
             .populate('studentProfileId')
             .sort('-appliedAt');
         
@@ -210,9 +213,10 @@ const getApplicationsByStudent = async (req, res) => {
 const updateApplicationStatus = async (req, res) => {
     try {
         const { status, notes } = req.body;
+        const normalizedStatus = status === 'hired' ? 'accepted' : status;
         const allowedStatuses = ['pending', 'reviewed', 'shortlisted', 'accepted', 'rejected'];
 
-        if (!allowedStatuses.includes(status)) {
+        if (!allowedStatuses.includes(normalizedStatus)) {
             return res.status(400).json({ success: false, message: 'Invalid application status' });
         }
         
@@ -221,16 +225,16 @@ const updateApplicationStatus = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Application not found' });
         }
         
-        application.status = status;
+        application.status = normalizedStatus;
         if (notes) application.notes = notes;
-        if (status === 'reviewed') application.reviewedAt = Date.now();
+        if (normalizedStatus === 'reviewed') application.reviewedAt = Date.now();
         
         await application.save();
         
         res.json({
             success: true,
             data: application,
-            message: `Application ${status} successfully`
+            message: `Application ${normalizedStatus} successfully`
         });
         
     } catch (error) {
@@ -245,7 +249,7 @@ const updateApplicationStatus = async (req, res) => {
 const getApplicationDetails = async (req, res) => {
     try {
         const application = await Application.findById(req.params.id)
-            .populate('studentId', 'name email')
+            .populate('studentId', 'firstName lastName email contactNumber')
             .populate('studentProfileId')
             .populate('internshipId', 'title companyId location type duration stipend');
         
