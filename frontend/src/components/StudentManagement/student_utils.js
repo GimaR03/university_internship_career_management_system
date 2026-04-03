@@ -63,6 +63,26 @@ export const logoutStudent = () => {
     localStorage.removeItem('studentAccount');
 };
 
+export const isStudentAuthError = (error) => {
+    const status = error?.response?.status;
+    const message = String(
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      error?.message ||
+      ''
+    ).toLowerCase();
+
+    return (
+      status === 401 ||
+      status === 403 ||
+      message.includes('unauthorized') ||
+      message.includes('invalid token') ||
+      message.includes('token expired') ||
+      message.includes('jwt') ||
+      message.includes('not authenticated')
+    );
+};
+
 // --- Review API Section ---
 
 const getAuthHeader = () => {
