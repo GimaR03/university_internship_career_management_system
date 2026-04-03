@@ -5,6 +5,7 @@ import AdminLayout from "./admin_layout";
 import { PAGE_ACCESS } from "./admin_utils";
 
 const API_URL = "http://localhost:5000/api";
+const PAYMENT_REFRESH_KEY = "admin_payments_last_updated";
 
 const getStoredAdminSession = () => {
   const saved = localStorage.getItem("stepin_admin_session");
@@ -58,6 +59,35 @@ const AdminTopPartnersPage = () => {
     if (adminSession?.token) {
       fetchPayments();
     }
+  }, [adminSession, fetchPayments]);
+
+  useEffect(() => {
+    if (!adminSession?.token) {
+      return undefined;
+    }
+
+    const handleStorage = (event) => {
+      if (event.key === PAYMENT_REFRESH_KEY) {
+        fetchPayments();
+      }
+    };
+
+    const handleFocus = () => {
+      fetchPayments();
+    };
+
+    const refreshInterval = setInterval(() => {
+      fetchPayments();
+    }, 30000);
+
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      clearInterval(refreshInterval);
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("focus", handleFocus);
+    };
   }, [adminSession, fetchPayments]);
 
   const partnerTotals = useMemo(() => {

@@ -6,6 +6,7 @@ import { PAGE_ACCESS } from './admin_utils';
 
 const API_URL = 'http://localhost:5000/api';
 const CHART_COLORS = ['#0f766e', '#06b6d4', '#f59e0b', '#f97316', '#8b5cf6', '#0284c7', '#84cc16', '#ec4899'];
+const PAYMENT_REFRESH_KEY = 'admin_payments_last_updated';
 
 const formatCurrency = (amount) =>
   `Rs ${Number(amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -108,13 +109,29 @@ const AdminPaymentAnalyticsPage = () => {
     };
 
     loadAnalytics();
+
+    const handleStorage = (event) => {
+      if (event.key === PAYMENT_REFRESH_KEY) {
+        loadAnalytics(false);
+      }
+    };
+
+    const handleFocus = () => {
+      loadAnalytics(false);
+    };
+
     const refreshInterval = setInterval(() => {
       loadAnalytics(false);
     }, 30000);
 
+    window.addEventListener('storage', handleStorage);
+    window.addEventListener('focus', handleFocus);
+
     return () => {
       isMounted = false;
       clearInterval(refreshInterval);
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('focus', handleFocus);
     };
   }, [adminSession, authConfig, refreshKey]);
 
