@@ -15,6 +15,9 @@ const Login = () => {
             <Link to="/login/company" className="block rounded-lg border border-indigo-200 dark:border-slate-700 px-4 py-3 font-medium text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-slate-700">
               Company Login
             </Link>
+            <Link to="/admin/login" className="block rounded-lg border border-indigo-200 dark:border-slate-700 px-4 py-3 font-medium text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-slate-700">
+              Admin Login
+            </Link>
           </div>
         </div>
 

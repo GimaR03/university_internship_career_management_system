@@ -11,6 +11,12 @@ import PaymentSuccess from './components/PaymentManagement/p_PaymentSuccess';
 import ProAccountUpgrade from './components/PaymentManagement/p_ProAccountUpgrade';
 import AdminPaymentManagement from './components/AdminManagement/A_PaymentManagement';
 import AdminPaymentAnalytics from './components/AdminManagement/A_PaymentAnalytics';
+import AdminLogin from './components/AdminManagement/admin_login';
+import AdminDashboard from './components/AdminManagement/admin_dashboard';
+import AdminCreatePage from './components/AdminManagement/admin_create_page';
+import AdminRegistryPage from './components/AdminManagement/admin_registry_page';
+import AdminCompanyPage from './components/AdminManagement/admin_company_page';
+import AdminInternshipPage from './components/AdminManagement/admin_internship_page';
 import StudentLogin from './components/StudentManagement/student_login';
 import StudentRegister from './components/StudentManagement/student_register';
 import StudentDashboard from './components/StudentManagement/S_Dashboard';
@@ -60,6 +66,12 @@ function App() {
           <Route path="/payments/summary" element={<PaymentSummary />} />
           <Route path="/payments/success" element={<PaymentSuccess />} />
           <Route path="/payments/pro-upgrade" element={<ProAccountUpgrade />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/create" element={<AdminCreatePage />} />
+          <Route path="/admin/registry" element={<AdminRegistryPage />} />
+          <Route path="/admin/companies" element={<AdminCompanyPage />} />
+          <Route path="/admin/internships" element={<AdminInternshipPage />} />
           <Route path="/admin/payments" element={<AdminPaymentManagement />} />
           <Route path="/admin/payments/analytics" element={<AdminPaymentAnalytics />} />
           
