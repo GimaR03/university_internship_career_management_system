@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCompanyProAccount, getStudentRecommendations, searchStudentsDirectly } from './C_CompanyUtils';
+import { getCompanyProAccount, getStudentRecommendations, searchStudentsDirectly, getInterviewSchedules, saveInterviewSchedule, deleteInterviewSchedule } from './C_CompanyUtils';
 import MatchSummary from './C_MatchSummary';
+import C_InterviewShedule from './C_interviewShedule';
 import { resolveUploadUrl } from '../StudentManagement/uploadUrl';
 
 const JOB_CATEGORIES = [
@@ -38,6 +39,8 @@ const DISTRICTS = [
 ];
 
 const SHORTLIST_STORAGE_KEY = 'companyShortlistedStudents';
+const SHORTLIST_STATUS_STORAGE_KEY = 'companyShortlistedStudentStatuses';
+const INTERVIEW_SCHEDULE_STORAGE_KEY = 'companyScheduledInterviews';
 
 const getFileExtension = (value) => {
     if (!value || typeof value !== 'string') return '';
@@ -63,6 +66,35 @@ const C_StudentRecommendations = ({ internships }) => {
     const [directLoading, setDirectLoading] = useState(false);
     const [directError, setDirectError] = useState('');
     const [shortlistedStudents, setShortlistedStudents] = useState([]);
+    const [shortlistStatuses, setShortlistStatuses] = useState({});
+    const [scheduledInterviews, setScheduledInterviews] = useState({});
+    const [interviewStudent, setInterviewStudent] = useState(null);
+
+    const normalizeScheduleMap = useCallback((items = []) => {
+        return items.reduce((accumulator, item) => {
+            const key = item.referenceKey || item.applicationId || item._id;
+            if (key) {
+                accumulator[key] = item;
+            }
+            return accumulator;
+        }, {});
+    }, []);
+
+    const loadScheduledInterviews = useCallback(async () => {
+        try {
+            const result = await getInterviewSchedules();
+            const mappedSchedules = normalizeScheduleMap(result.data || []);
+            setScheduledInterviews(mappedSchedules);
+            localStorage.setItem(INTERVIEW_SCHEDULE_STORAGE_KEY, JSON.stringify(mappedSchedules));
+        } catch {
+            try {
+                const savedSchedules = JSON.parse(localStorage.getItem(INTERVIEW_SCHEDULE_STORAGE_KEY) || '{}');
+                setScheduledInterviews(savedSchedules && typeof savedSchedules === 'object' ? savedSchedules : {});
+            } catch {
+                setScheduledInterviews({});
+            }
+        }
+    }, [normalizeScheduleMap]);
 
     const isProActive = Boolean(proStatus?.isProActive);
 
@@ -73,11 +105,37 @@ const C_StudentRecommendations = ({ internships }) => {
         } catch {
             setShortlistedStudents([]);
         }
-    }, []);
+
+        try {
+            const savedStatuses = JSON.parse(localStorage.getItem(SHORTLIST_STATUS_STORAGE_KEY) || '{}');
+            setShortlistStatuses(savedStatuses && typeof savedStatuses === 'object' ? savedStatuses : {});
+        } catch {
+            setShortlistStatuses({});
+        }
+
+        loadScheduledInterviews();
+    }, [loadScheduledInterviews]);
 
     useEffect(() => {
         localStorage.setItem(SHORTLIST_STORAGE_KEY, JSON.stringify(shortlistedStudents));
     }, [shortlistedStudents]);
+
+    useEffect(() => {
+        localStorage.setItem(SHORTLIST_STATUS_STORAGE_KEY, JSON.stringify(shortlistStatuses));
+    }, [shortlistStatuses]);
+
+    useEffect(() => {
+        localStorage.setItem(INTERVIEW_SCHEDULE_STORAGE_KEY, JSON.stringify(scheduledInterviews));
+    }, [scheduledInterviews]);
+
+    useEffect(() => {
+        window.addEventListener('focus', loadScheduledInterviews);
+        window.addEventListener('companyInterviewSchedulesUpdated', loadScheduledInterviews);
+        return () => {
+            window.removeEventListener('focus', loadScheduledInterviews);
+            window.removeEventListener('companyInterviewSchedulesUpdated', loadScheduledInterviews);
+        };
+    }, [loadScheduledInterviews]);
 
     useEffect(() => {
         const fetchProStatus = async () => {
@@ -143,12 +201,135 @@ const C_StudentRecommendations = ({ internships }) => {
 
             return [...current, student];
         });
+
+        setShortlistStatuses((current) => {
+            if (current[student._id]) {
+                const next = { ...current };
+                delete next[student._id];
+                return next;
+            }
+            return { ...current, [student._id]: 'shortlisted' };
+        });
     };
 
     const isShortlisted = (studentId) => shortlistedStudents.some((student) => student._id === studentId);
 
     const removeFromShortlist = (studentId) => {
         setShortlistedStudents((current) => current.filter((student) => student._id !== studentId));
+        setShortlistStatuses((current) => {
+            const next = { ...current };
+            delete next[studentId];
+            return next;
+        });
+    };
+
+    const getShortlistStatus = (studentId) => shortlistStatuses[studentId] || 'shortlisted';
+
+    const setStudentStatus = (studentId, status) => {
+        setShortlistStatuses((current) => ({ ...current, [studentId]: status }));
+    };
+
+    const getInterviewRecordKey = (studentId) => `${studentId}-${selectedInternship || 'general'}`;
+
+    const getScheduledInterviewForStudent = (studentId) => {
+        const exactKey = getInterviewRecordKey(studentId);
+        if (scheduledInterviews[exactKey]) {
+            return { key: exactKey, schedule: scheduledInterviews[exactKey] };
+        }
+
+        const fallbackEntry = Object.entries(scheduledInterviews).find(([, schedule]) => schedule?.studentId === studentId);
+        if (!fallbackEntry) return null;
+
+        return { key: fallbackEntry[0], schedule: fallbackEntry[1] };
+    };
+
+    const openInterviewScheduler = (student) => {
+        setInterviewStudent(student);
+    };
+
+    const handleInterviewScheduleSave = (scheduleData) => {
+        if (!interviewStudent) return;
+
+        const persistSchedule = async () => {
+            try {
+                const response = await saveInterviewSchedule({
+                    ...scheduleData,
+                    internshipId: selectedInternship || scheduleData.internshipId,
+                    source: 'direct'
+                });
+
+                const savedSchedule = response.data;
+                const key = savedSchedule.referenceKey || scheduleData.referenceKey || getInterviewRecordKey(interviewStudent._id);
+
+                setScheduledInterviews((current) => {
+                    const updated = {
+                        ...current,
+                        [key]: savedSchedule
+                    };
+                    localStorage.setItem(INTERVIEW_SCHEDULE_STORAGE_KEY, JSON.stringify(updated));
+                    return updated;
+                });
+
+                window.dispatchEvent(new Event('companyInterviewSchedulesUpdated'));
+                setInterviewStudent(null);
+                alert('Interview scheduled successfully.');
+            } catch (err) {
+                const message = err?.message || 'Failed to save interview schedule';
+                setDirectError(message);
+                setError(message);
+                alert(message);
+            }
+        };
+
+        persistSchedule();
+    };
+
+    const cancelInterviewSchedule = (recordKey) => {
+        const confirmed = window.confirm('Are you sure you want to cancel this interview schedule?');
+        if (!confirmed) return;
+
+        const existingSchedule = scheduledInterviews[recordKey];
+
+        const performCancel = async () => {
+            try {
+                if (existingSchedule?._id) {
+                    await deleteInterviewSchedule(existingSchedule._id);
+                }
+
+                setScheduledInterviews((current) => {
+                    const updated = { ...current };
+                    delete updated[recordKey];
+                    localStorage.setItem(INTERVIEW_SCHEDULE_STORAGE_KEY, JSON.stringify(updated));
+                    return updated;
+                });
+
+                window.dispatchEvent(new Event('companyInterviewSchedulesUpdated'));
+            } catch (err) {
+                const message = err?.message || 'Failed to cancel interview schedule';
+                setDirectError(message);
+                setError(message);
+                alert(message);
+            }
+        };
+
+        performCancel();
+    };
+
+    const formatInterviewDate = (schedule) => {
+        if (!schedule?.interviewDateTime) return '';
+        return new Date(schedule.interviewDateTime).toLocaleString();
+    };
+
+    const getStatusBadgeClasses = (status) => {
+        if (status === 'hired') return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300';
+        if (status === 'rejected') return 'bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300';
+        return 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300';
+    };
+
+    const getStatusLabel = (status) => {
+        if (status === 'hired') return 'Hired';
+        if (status === 'rejected') return 'Rejected';
+        return 'Shortlisted';
     };
 
     const getScoreColor = (score) => {
@@ -266,6 +447,7 @@ const C_StudentRecommendations = ({ internships }) => {
                                     const cvType = getCvDisplayType(student.cv);
                                     const cvUrl = student.cv ? resolveUploadUrl(student.cv) : '';
                                     const reasons = getRecommendationReasons(student);
+                                    const scheduledInterview = getScheduledInterviewForStudent(student._id);
 
                                     return (
                                         <div key={student._id} className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/80">
@@ -374,6 +556,41 @@ const C_StudentRecommendations = ({ internships }) => {
                                                         >
                                                             {shortlisted ? 'Remove from Shortlist' : 'Shortlist Student'}
                                                         </button>
+                                                        {shortlisted && (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setStudentStatus(student._id, 'hired');
+                                                                        openInterviewScheduler(student);
+                                                                    }}
+                                                                    className="rounded-xl px-4 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700"
+                                                                >
+                                                                    Hired
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => setStudentStatus(student._id, 'rejected')}
+                                                                    className="rounded-xl px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700"
+                                                                >
+                                                                    Reject
+                                                                </button>
+                                                                {getShortlistStatus(student._id) === 'hired' && scheduledInterview && (
+                                                                    <>
+                                                                        <button
+                                                                            onClick={() => openInterviewScheduler(student)}
+                                                                            className="rounded-xl px-4 py-2 text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700"
+                                                                        >
+                                                                            Reschedule Interview
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() => cancelInterviewSchedule(scheduledInterview.key)}
+                                                                            className="rounded-xl border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 dark:border-red-700 dark:text-red-300 dark:hover:bg-red-950/30"
+                                                                        >
+                                                                            Cancel Interview
+                                                                        </button>
+                                                                    </>
+                                                                )}
+                                                            </>
+                                                        )}
                                                         <button
                                                             onClick={() => window.open(`/company/student-profile/${student._id}`, '_blank')}
                                                             className="rounded-xl border border-indigo-500 px-4 py-2 text-sm font-semibold text-indigo-600 transition hover:bg-indigo-50 dark:border-cyan-400 dark:text-cyan-300 dark:hover:bg-cyan-400/10"
@@ -381,6 +598,15 @@ const C_StudentRecommendations = ({ internships }) => {
                                                             View Profile
                                                         </button>
                                                     </div>
+
+                                                    {scheduledInterview && (
+                                                        <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700 dark:border-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300">
+                                                            <span className="inline-flex rounded-full bg-emerald-100 px-2 py-0.5 font-semibold text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300 mr-2">
+                                                                Scheduled
+                                                            </span>
+                                                            {formatInterviewDate(scheduledInterview.schedule)}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -414,7 +640,10 @@ const C_StudentRecommendations = ({ internships }) => {
                     </div>
 
                     <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                        {shortlistedStudents.map((student) => (
+                        {shortlistedStudents.map((student) => {
+                            const scheduledInterview = getScheduledInterviewForStudent(student._id);
+
+                            return (
                             <div key={student._id} className="rounded-2xl border border-white bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
                                 <div className="flex items-center gap-3">
                                     <img
@@ -427,6 +656,8 @@ const C_StudentRecommendations = ({ internships }) => {
                                             {student.firstName} {student.lastName}
                                         </h4>
                                         <p className="text-xs text-slate-500 dark:text-slate-400">{student.preferredField || 'No preferred field'}</p>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{student.email || 'No email'}</p>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400">{student.contactNumber || 'No phone number'}</p>
                                     </div>
                                 </div>
 
@@ -434,9 +665,55 @@ const C_StudentRecommendations = ({ internships }) => {
                                     <p><b>District:</b> {student.district || 'N/A'}</p>
                                     <p><b>Level:</b> {student.eduLevel || 'N/A'}</p>
                                     <p><b>CV:</b> {student.cv ? getCvDisplayType(student.cv).toUpperCase() : 'Not uploaded'}</p>
+                                    <p>
+                                        <b>Status:</b>{' '}
+                                        <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${getStatusBadgeClasses(getShortlistStatus(student._id))}`}>
+                                            {getStatusLabel(getShortlistStatus(student._id))}
+                                        </span>
+                                    </p>
+                                    {scheduledInterview && (
+                                        <p>
+                                            <b>Interview:</b>{' '}
+                                            <span className="inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
+                                                Scheduled
+                                            </span>
+                                            <span className="ml-2 text-xs">{formatInterviewDate(scheduledInterview.schedule)}</span>
+                                        </p>
+                                    )}
                                 </div>
 
-                                <div className="mt-4 flex gap-3">
+                                <div className="mt-4 flex flex-wrap gap-3">
+                                    <button
+                                        onClick={() => {
+                                            setStudentStatus(student._id, 'hired');
+                                            openInterviewScheduler(student);
+                                        }}
+                                        className="rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-700"
+                                    >
+                                        Hired
+                                    </button>
+                                    <button
+                                        onClick={() => setStudentStatus(student._id, 'rejected')}
+                                        className="rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white hover:bg-red-700"
+                                    >
+                                        Reject
+                                    </button>
+                                    {getShortlistStatus(student._id) === 'hired' && (
+                                        <button
+                                            onClick={() => openInterviewScheduler(student)}
+                                            className="rounded-lg bg-teal-600 px-3 py-2 text-xs font-semibold text-white hover:bg-teal-700"
+                                        >
+                                            Reschedule Interview
+                                        </button>
+                                    )}
+                                    {scheduledInterview && (
+                                        <button
+                                            onClick={() => cancelInterviewSchedule(scheduledInterview.key)}
+                                            className="rounded-lg border border-red-300 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-50 dark:border-red-700 dark:text-red-300 dark:hover:bg-red-950/30"
+                                        >
+                                            Cancel Interview
+                                        </button>
+                                    )}
                                     <button
                                         onClick={() => removeFromShortlist(student._id)}
                                         className="rounded-lg border border-red-300 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-50 dark:border-red-700 dark:text-red-300 dark:hover:bg-red-950/30"
@@ -451,7 +728,7 @@ const C_StudentRecommendations = ({ internships }) => {
                                     </button>
                                 </div>
                             </div>
-                        ))}
+                        )})}
                     </div>
                 </div>
             )}
@@ -620,6 +897,36 @@ const C_StudentRecommendations = ({ internships }) => {
                     student={selectedStudent}
                     internshipId={selectedInternship}
                     onClose={() => setSelectedStudent(null)}
+                />
+            )}
+
+            {interviewStudent && (
+                <C_InterviewShedule
+                    application={{
+                        _id: getInterviewRecordKey(interviewStudent._id),
+                        internship: selectedInternship,
+                        student: {
+                            _id: interviewStudent._id,
+                            name: `${interviewStudent.firstName || ''} ${interviewStudent.lastName || ''}`.trim() || interviewStudent.name || 'Student',
+                            email: interviewStudent.email,
+                            contactNumber: interviewStudent.contactNumber,
+                            university: interviewStudent.university,
+                            degree: interviewStudent.degree,
+                            preferredField: interviewStudent.preferredField,
+                            district: interviewStudent.district,
+                            province: interviewStudent.province,
+                            frontendSkills: interviewStudent.frontendSkills,
+                            backendSkills: interviewStudent.backendSkills,
+                            databaseSkills: interviewStudent.databaseSkills,
+                            bio: interviewStudent.bio
+                        },
+                        status: 'accepted',
+                        createdAt: new Date().toISOString(),
+                        coverLetter: 'Shortlisted from Find Students page.'
+                    }}
+                    existingSchedule={scheduledInterviews[getInterviewRecordKey(interviewStudent._id)]}
+                    onClose={() => setInterviewStudent(null)}
+                    onSchedule={handleInterviewScheduleSave}
                 />
             )}
         </div>
