@@ -231,6 +231,45 @@ export const updateApplicationStatus = async (applicationId, status) => {
     }
 };
 
+// Get Interview Schedules for Company
+export const getInterviewSchedules = async () => {
+    try {
+        const response = await axios.get(`${API_URL}/interviews/company`, getAuthHeader());
+        return response.data;
+    } catch (error) {
+        if (error.response?.status === 404) {
+            throw { message: 'Interview API route is not active. Restart backend server and try again.' };
+        }
+        throw error.response?.data || { message: 'Failed to fetch interview schedules' };
+    }
+};
+
+// Save or update an Interview Schedule
+export const saveInterviewSchedule = async (scheduleData) => {
+    try {
+        const response = await axios.post(`${API_URL}/interviews`, scheduleData, getAuthHeader());
+        return response.data;
+    } catch (error) {
+        if (error.response?.status === 404) {
+            throw { message: 'Interview API route is not active. Restart backend server and try again.' };
+        }
+        throw error.response?.data || { message: 'Failed to save interview schedule' };
+    }
+};
+
+// Delete an Interview Schedule
+export const deleteInterviewSchedule = async (scheduleId) => {
+    try {
+        const response = await axios.delete(`${API_URL}/interviews/${scheduleId}`, getAuthHeader());
+        return response.data;
+    } catch (error) {
+        if (error.response?.status === 404) {
+            throw { message: 'Interview API route is not active. Restart backend server and try again.' };
+        }
+        throw error.response?.data || { message: 'Failed to delete interview schedule' };
+    }
+};
+
 // Logout Company
 export const logoutCompany = () => {
     localStorage.removeItem('companyToken');

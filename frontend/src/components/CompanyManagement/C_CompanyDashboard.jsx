@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { getCompanyProfile, getCompanyInternships, logoutCompany } from './C_CompanyUtils';
+import { getCompanyProfile, getCompanyInternships, getInterviewSchedules, logoutCompany } from './C_CompanyUtils';
 import PostInternship from './C_PostInternship';
 import InternshipList from './C_InternshipList';
 import StudentRecommendations from './C_StudentRecommendations';
 import CompanyProfile from './C_CompanyProfile';
 import ApplicationManagement from './C_ApplicationManagement';
+import InterviewScheduleDashboard from './C_InterviewScheduleDashboard';
 import CompanyReviews from './C_CompanyReviews';
 import JobPostBot from './C_JobPostBot';
 import DraggableBotAssistant from './C_DraggableBotAssistant';
@@ -19,6 +20,30 @@ const C_CompanyDashboard = () => {
     const [companyData, setCompanyData] = useState(null);
     const [internships, setInternships] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [scheduledInterviews, setScheduledInterviews] = useState({});
+
+    const loadSchedules = useCallback(async () => {
+        try {
+            const result = await getInterviewSchedules();
+            const mappedSchedules = (result.data || []).reduce((accumulator, item) => {
+                const key = item.referenceKey || item.applicationId || item._id;
+                if (key) {
+                    accumulator[key] = item;
+                }
+                return accumulator;
+            }, {});
+
+            setScheduledInterviews(mappedSchedules);
+            localStorage.setItem('companyScheduledInterviews', JSON.stringify(mappedSchedules));
+        } catch {
+            try {
+                const saved = localStorage.getItem('companyScheduledInterviews');
+                setScheduledInterviews(saved ? JSON.parse(saved) : {});
+            } catch {
+                setScheduledInterviews({});
+            }
+        }
+    }, []);
 
     useEffect(() => {
         if (state?.activeTab) {
@@ -66,6 +91,21 @@ const C_CompanyDashboard = () => {
         fetchCompanyData();
         fetchInternships();
     }, [fetchCompanyData, fetchInternships]);
+
+    useEffect(() => {
+        loadSchedules();
+        window.addEventListener('focus', loadSchedules);
+        window.addEventListener('companyInterviewSchedulesUpdated', loadSchedules);
+
+        return () => {
+            window.removeEventListener('focus', loadSchedules);
+            window.removeEventListener('companyInterviewSchedulesUpdated', loadSchedules);
+        };
+    }, [loadSchedules]);
+
+    useEffect(() => {
+        loadSchedules();
+    }, [activeTab, loadSchedules]);
 
     useEffect(() => {
         if (activeTab === 'internships' || activeTab === 'overview') {
@@ -164,13 +204,14 @@ const C_CompanyDashboard = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <nav className="flex space-x-8 overflow-x-auto">
                         {[
-                            { id: 'overview', name: 'Dashboard Overview', icon: '📊' },
+                            { id: 'overview', name: 'Dashboard', icon: '📊' },
                             { id: 'post', name: 'Post Internship', icon: '📝' },
                             { id: 'internships', name: 'My Internships', icon: '💼' },
                             { id: 'applications', name: 'Applications', icon: '📋' },
+                            { id: 'interviews', name: 'Interview Schedule', icon: '🗓️' },
                             { id: 'recommendations', name: 'Find Students', icon: '🎯' },
                             { id: 'reviews', name: 'Reviews', icon: '⭐' },
-                            { id: 'profile', name: 'Company Profile', icon: '🏢' }
+                            { id: 'profile', name: 'Profile', icon: '🏢' }
                         ].map((tab) => (
                             <button
                                 key={tab.id}
@@ -288,6 +329,18 @@ const C_CompanyDashboard = () => {
                                         </div>
                                     </button>
                                     <button
+                                        onClick={() => setActiveTab('interviews')}
+                                        className="w-full p-3 border-2 border-dashed border-emerald-300 rounded-lg hover:border-emerald-500 hover:bg-emerald-50 transition-colors text-left"
+                                    >
+                                        <div className="flex items-center space-x-3">
+                                            <span className="text-2xl">🗓️</span>
+                                            <div>
+                                                <div className="font-semibold text-emerald-600">Interview Schedule</div>
+                                                <div className="text-sm text-gray-500">Open calendar and view interview details</div>
+                                            </div>
+                                        </div>
+                                    </button>
+                                    <button
                                         onClick={() => setActiveTab('reviews')}
                                         className="w-full p-3 border-2 border-dashed border-amber-300 rounded-lg hover:border-amber-500 hover:bg-amber-50 transition-colors text-left"
                                     >
@@ -366,6 +419,10 @@ const C_CompanyDashboard = () => {
 
                 {activeTab === 'applications' && (
                     <ApplicationManagement internships={internships} />
+                )}
+
+                {activeTab === 'interviews' && (
+                    <InterviewScheduleDashboard interviews={scheduledInterviews} internships={internships} />
                 )}
 
                 {activeTab === 'recommendations' && (
